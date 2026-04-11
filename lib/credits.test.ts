@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { spendCreditTx, topUpCreditsTx, InsufficientCreditsError } from './credits';
+import { spendCreditTx, topUpCreditsTx, refundCreditsTx, InsufficientCreditsError } from './credits';
 
 // A minimal fake of a Firestore transaction that lets us assert updates.
 function makeFakeTx(initialUser: { credits: number }) {
@@ -58,5 +58,28 @@ describe('topUpCreditsTx', () => {
 
     expect(user.credits).toBe(6);
     expect(writes.some((w) => w.op === 'set' && w.data.type === 'purchase')).toBe(true);
+  });
+});
+
+describe('refundCreditsTx', () => {
+  it('decrements credits and records a refund transaction', async () => {
+    const { tx, writes, user } = makeFakeTx({ credits: 5 });
+    const userRef = { __collection: 'users', id: 'uid' };
+    const txnCol = { doc: () => ({ __collection: 'credit_txns', id: 'txn3' }) };
+
+    await refundCreditsTx(tx as any, userRef as any, txnCol as any, 'uid', 1, 'rfd_456');
+
+    expect(user.credits).toBe(4);
+    expect(writes.some((w) => w.op === 'set' && w.data.type === 'refund')).toBe(true);
+  });
+
+  it('allows balance to go negative when user has spent the refunded credits', async () => {
+    const { tx, user } = makeFakeTx({ credits: 0 });
+    const userRef = { __collection: 'users', id: 'uid' };
+    const txnCol = { doc: () => ({ __collection: 'credit_txns', id: 'txn4' }) };
+
+    await refundCreditsTx(tx as any, userRef as any, txnCol as any, 'uid', 1, 'rfd_789');
+
+    expect(user.credits).toBe(-1);
   });
 });
