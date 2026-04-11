@@ -45,23 +45,23 @@ async function generate(prompt, filename) {
   const jobs = [
     [
       "Children's picture book cover. Title at top: Luna's Little Song. Cute crescent moon character with closed eyes humming, soft yellow background, stars and clouds, warm pastel watercolor, hand-drawn illustration, no text other than the title.",
-      'showcase-cover.png',
+      'showcase-cover.jpg',
     ],
     [
       "A cute crescent moon character standing on a cloud, looking down at a small village below, soft pastel watercolor children's book illustration, warm and dreamy, no text.",
-      'showcase-page-1.png',
+      'showcase-page-1.jpg',
     ],
     [
       "A cute crescent moon character handing a tiny star to a sleeping child, bedroom window scene, soft pastel watercolor, no text.",
-      'showcase-page-2.png',
+      'showcase-page-2.jpg',
     ],
     [
       "A cute crescent moon character flying back into the sky as the sun rises, soft pastel watercolor children's book illustration, no text.",
-      'showcase-page-3.png',
+      'showcase-page-3.jpg',
     ],
     [
       "Open Graph social card. Cream background, a cute crescent moon character with a small star, scattered sparkles, soft watercolor, warm and dreamy, no text.",
-      'og-image.png',
+      'og-image.jpg',
     ],
   ];
   try {

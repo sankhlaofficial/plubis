@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     title: BRAND_NAME,
     description: TAGLINE,
     type: 'website',
-    images: ['/og-image.png'],
+    images: ['/og-image.jpg'],
   },
   icons: {
     icon: '/favicon.ico',
