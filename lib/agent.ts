@@ -37,19 +37,28 @@ export interface SessionEventsResult {
 }
 
 /**
- * Lists new events since the given cursor. Returns the events, the new cursor,
- * and whether the session reached idle status.
+ * Lists session events. Anthropic Managed Agents events.list does NOT support
+ * cursor-based pagination via 'after' (verified during QA on 2026-04-11 — the
+ * API only accepts `limit`, `order`, `page`). So we fetch all events ascending
+ * each time and rely on the caller to dedupe / extract what it needs.
+ *
+ * The `afterCursor` argument is preserved in the signature for backwards
+ * compatibility but is no longer used for the API call. The returned
+ * `nextCursor` is set to the last event id so the caller can still detect
+ * "no new events since last poll" by comparing strings.
  */
 export async function listNewEvents(
   sessionId: string,
   afterCursor: string | null,
 ): Promise<SessionEventsResult> {
-  const params: any = {};
-  if (afterCursor) params.after = afterCursor;
+  void afterCursor; // intentionally unused — see comment above
 
-  const resp: any = await (client.beta.sessions as any).events.list(sessionId, params);
+  const resp: any = await (client.beta.sessions as any).events.list(sessionId, {
+    limit: 1000,
+    order: 'asc',
+  });
   const events = resp.data || [];
-  const nextCursor = events.length > 0 ? events[events.length - 1].id : afterCursor;
+  const nextCursor = events.length > 0 ? events[events.length - 1].id : null;
   const isIdle = events.some((e: any) => e.type === 'session.status_idle');
 
   return { events, nextCursor, isIdle };
