@@ -18,6 +18,12 @@ export async function GET(request: Request) {
   const jobId = url.searchParams.get('jobId');
   if (!jobId) return NextResponse.json({ error: 'Missing jobId' }, { status: 400 });
 
+  // Firestore document IDs must be 1-1500 bytes, no '/'. Reject anything else
+  // here to avoid throwing inside Firestore SDK and surfacing as 500.
+  if (!isValidJobId(jobId)) {
+    return NextResponse.json({ error: 'Invalid jobId format' }, { status: 400 });
+  }
+
   const db = adminDb();
   const jobRef = db.collection('jobs').doc(jobId);
   const snap = await jobRef.get();
@@ -66,4 +72,11 @@ export async function GET(request: Request) {
   } catch (err: any) {
     return NextResponse.json({ error: 'Poll failed', message: err?.message }, { status: 500 });
   }
+}
+
+// Firestore document ID rules: 1-1500 bytes, no '/', no '..', no '__.*__' segments.
+// We're stricter and only allow our own jobId shape: alphanumeric + underscore + hyphen, 1-200 chars.
+// Firestore auto-generated IDs are 20 chars [A-Za-z0-9], so 200 is generous.
+function isValidJobId(id: string): boolean {
+  return /^[A-Za-z0-9_-]{1,200}$/.test(id);
 }

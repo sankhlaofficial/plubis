@@ -27,26 +27,31 @@ export interface DodoCheckoutSession {
 }
 
 /**
- * Creates a hosted checkout session. Passes uid + creditAmount as metadata
- * so the webhook handler can attribute the purchase.
+ * Creates a hosted checkout session via Dodo Payments. Passes uid +
+ * creditAmount as metadata so the webhook handler can attribute the purchase.
  *
- * Thin wrapper over the Dodo REST API — kept in one place so swapping
- * endpoints or upgrading the SDK is a single-file change.
+ * IMPORTANT: the live API host is `live.dodopayments.com` (NOT `api.dodo...`).
+ * The endpoint is `/checkouts` and the body uses `product_cart` + `return_url`
+ * (NOT line_items + success_url). The response shape is { session_id, checkout_url }.
+ * These were verified by hitting the live API directly during QA on 2026-04-11.
+ *
+ * Dodo's /checkouts endpoint does not have a separate cancel_url — the user
+ * just closes the checkout window if they cancel, returning them to the page
+ * they came from.
  */
 export async function createDodoCheckoutSession(input: DodoCheckoutSessionInput): Promise<DodoCheckoutSession> {
   const apiKey = process.env.DODO_API_KEY;
   if (!apiKey) throw new Error('DODO_API_KEY not set');
 
-  const resp = await fetch('https://api.dodopayments.com/checkout_sessions', {
+  const resp = await fetch('https://live.dodopayments.com/checkouts', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      line_items: [{ product_id: input.productId, quantity: 1 }],
-      success_url: input.successUrl,
-      cancel_url: input.cancelUrl,
+      product_cart: [{ product_id: input.productId, quantity: 1 }],
+      return_url: input.successUrl,
       metadata: {
         uid: input.uid,
         creditAmount: String(input.creditAmount),
@@ -60,5 +65,5 @@ export async function createDodoCheckoutSession(input: DodoCheckoutSessionInput)
   }
 
   const data = await resp.json();
-  return { url: data.checkout_url || data.url, id: data.id };
+  return { url: data.checkout_url, id: data.session_id };
 }
