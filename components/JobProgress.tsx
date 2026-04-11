@@ -65,21 +65,48 @@ export function JobProgress({ jobId }: { jobId: string }) {
     (async () => {
       const token = await getIdToken();
       const pageCount = job.bookJson!.pages.length;
+
+      // Per-image retry: Cloudflare Flux Schnell occasionally takes >10s,
+      // which trips Vercel Hobby's function timeout and returns 504. The
+      // /api/book/image route is idempotent (returns existing url if the
+      // image is already uploaded) so retrying the same page is safe and
+      // cheap. Up to 3 attempts per image with 2s spacing between tries.
+      const generateOne = async (p: number): Promise<boolean> => {
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const resp = await fetch('/api/book/image', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ jobId, page: p }),
+            });
+            if (resp.ok) return true;
+            // Retry on transient 5xx — leave 4xx alone, they won't get better.
+            if (resp.status < 500) return false;
+          } catch {
+            // network error — fall through to retry
+          }
+          if (attempt < 3) await new Promise((r) => setTimeout(r, 2000));
+        }
+        return false;
+      };
+
+      // Fire all images in parallel, each with its own retry loop.
       // 1 cover + N pages.
-      const calls: Promise<Response>[] = [];
+      const tasks: Promise<boolean>[] = [];
       for (let p = 0; p <= pageCount; p++) {
-        calls.push(
-          fetch('/api/book/image', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ jobId, page: p }),
-          }),
-        );
+        tasks.push(generateOne(p));
       }
-      await Promise.all(calls);
+      const results = await Promise.all(tasks);
+      const failed = results.filter((ok) => !ok).length;
+      if (failed > 0) {
+        // After all retries exhausted, surface the error to the UI so the
+        // user can hit Reload (which will re-trigger this effect because
+        // the imagesKickedOff guard resets on a fresh mount).
+        setError(`${failed} of ${pageCount + 1} illustrations failed after 3 retries — refresh to try again`);
+      }
     })().catch((e) => setError(e.message));
   }, [job?.status, job?.bookJson, jobId, getIdToken]);
 
