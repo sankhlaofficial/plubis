@@ -49,11 +49,18 @@ async function handlePaymentSucceeded(payment: any): Promise<Response> {
   const paymentId = payment.id || payment.payment_id;
   const metadata = payment.metadata || {};
   const uid = metadata.uid;
-  const creditAmount = parseInt(metadata.creditAmount || '0', 10);
+  const rawCreditAmount = metadata.creditAmount;
 
-  if (!uid || !paymentId || !creditAmount) {
+  // Strict validation: must be a string that parses to a positive integer.
+  // Rejects: missing, empty, "0", "-5", "1.5", "five", null, undefined.
+  // This guards against Dodo (or a spoofed metadata) ever silently debiting.
+  if (!uid || !paymentId || typeof rawCreditAmount !== 'string') {
     return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
   }
+  if (!/^[1-9][0-9]*$/.test(rawCreditAmount)) {
+    return NextResponse.json({ error: 'Invalid creditAmount — must be positive integer' }, { status: 400 });
+  }
+  const creditAmount = parseInt(rawCreditAmount, 10);
 
   const db = adminDb();
   const userRef = db.collection('users').doc(uid);

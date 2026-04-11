@@ -48,6 +48,11 @@ export async function spendCreditTx(
  * a 'purchase' credit_txn. Idempotent via dodoPaymentId — caller should
  * pre-check by querying for an existing txn with this paymentId before
  * running the transaction.
+ *
+ * Uses set with merge so the user doc is created on the fly if the user
+ * has paid before they ever called /api/book/create (which is the only
+ * other place that pre-creates the doc). Without merge, tx.update would
+ * throw on a non-existent user doc.
  */
 export async function topUpCreditsTx(
   tx: Transaction,
@@ -58,11 +63,28 @@ export async function topUpCreditsTx(
   dodoPaymentId: string,
 ): Promise<number> {
   const snap = await tx.get(userRef);
+  const exists = snap.exists;
   const data = snap.data() as { credits?: number } | undefined;
   const current = data?.credits ?? 0;
   const newBalance = current + amount;
 
-  tx.update(userRef, { credits: newBalance });
+  if (exists) {
+    tx.update(userRef, { credits: newBalance });
+  } else {
+    // First-touch user doc creation. Other fields (email, displayName, etc.)
+    // get filled in on first /api/book/create call.
+    tx.set(userRef, {
+      uid: userId,
+      email: '',
+      displayName: '',
+      photoURL: '',
+      credits: newBalance,
+      totalBooksGenerated: 0,
+      createdAt: FieldValue.serverTimestamp(),
+      lastActiveAt: FieldValue.serverTimestamp(),
+    });
+  }
+
   tx.set(txnCol.doc(), {
     userId,
     type: 'purchase',

@@ -2,13 +2,14 @@ import { describe, it, expect, vi } from 'vitest';
 import { spendCreditTx, topUpCreditsTx, refundCreditsTx, InsufficientCreditsError } from './credits';
 
 // A minimal fake of a Firestore transaction that lets us assert updates.
-function makeFakeTx(initialUser: { credits: number }) {
+// `userExists` controls whether the get() returns an existing doc or not.
+function makeFakeTx(initialUser: { credits: number }, userExists = true) {
   const writes: any[] = [];
   const user = { ...initialUser };
   const tx = {
     async get(ref: any) {
       if (ref.__collection === 'users') {
-        return { exists: true, data: () => user, id: 'uid' };
+        return { exists: userExists, data: () => (userExists ? user : undefined), id: 'uid' };
       }
       // Empty query result for idempotency checks.
       return { empty: true, size: 0 };
@@ -20,6 +21,9 @@ function makeFakeTx(initialUser: { credits: number }) {
       writes.push({ op: 'update', ref, data });
     },
     set(ref: any, data: any) {
+      if (ref.__collection === 'users') {
+        Object.assign(user, data);
+      }
       writes.push({ op: 'set', ref, data });
     },
   };
@@ -57,7 +61,22 @@ describe('topUpCreditsTx', () => {
     await topUpCreditsTx(tx as any, userRef as any, txnCol as any, 'uid', 5, 'pay_123');
 
     expect(user.credits).toBe(6);
+    // After fix: existing user goes through update path
+    expect(writes.some((w) => w.op === 'update' && w.data.credits === 6)).toBe(true);
     expect(writes.some((w) => w.op === 'set' && w.data.type === 'purchase')).toBe(true);
+  });
+
+  it('creates the user doc if it does not exist (first-touch)', async () => {
+    const { tx, writes, user } = makeFakeTx({ credits: 0 }, /* userExists */ false);
+    const userRef = { __collection: 'users', id: 'newuid' };
+    const txnCol = { doc: () => ({ __collection: 'credit_txns', id: 'txn99' }) };
+
+    await topUpCreditsTx(tx as any, userRef as any, txnCol as any, 'newuid', 5, 'pay_first_touch');
+
+    // After fix: missing user should be CREATED via set, not crashed
+    expect(writes.some((w) => w.op === 'set' && w.ref.__collection === 'users' && w.data.credits === 5)).toBe(true);
+    expect(writes.some((w) => w.op === 'set' && w.data.type === 'purchase')).toBe(true);
+    expect(user.credits).toBe(5);
   });
 });
 
