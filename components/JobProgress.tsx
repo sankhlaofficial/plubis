@@ -5,6 +5,9 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { clientDb } from '@/lib/firebase-client';
 import { useAuth } from './AuthProvider';
 import type { Job } from '@/lib/types';
+import PillLabel from '@/components/PillLabel';
+import Button from '@/components/Button';
+import JobPhaseAnimation from '@/components/JobPhaseAnimation';
 
 export function JobProgress({ jobId }: { jobId: string }) {
   const { getIdToken } = useAuth();
@@ -153,56 +156,127 @@ export function JobProgress({ jobId }: { jobId: string }) {
     })().catch((e) => setError(e.message));
   }, [job?.pdfUrl, job?.epubUrl, jobId, getIdToken]);
 
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (!job) return <p>Loading...</p>;
+  if (error) {
+    return (
+      <div className="w-full max-w-md mx-auto text-center">
+        <div className="rounded-[28px] bg-white border-2 border-outline p-10">
+          <div className="flex justify-center mb-4">
+            <PillLabel color="pink">Something went wrong</PillLabel>
+          </div>
+          <p className="text-ink-soft mb-6">{error}</p>
+          <Button href="/library" variant="secondary" size="md">Back to library</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="w-full max-w-md mx-auto">
+        <div className="h-96 rounded-[28px] animate-shimmer" />
+      </div>
+    );
+  }
 
   if (job.status === 'failed') {
     return (
-      <div className="text-center">
-        <h2 className="text-2xl mb-2">Something went wrong</h2>
-        <p className="text-[#5D6D7E] mb-4">{job.error?.message || 'Unknown error'}</p>
+      <div className="w-full max-w-md mx-auto text-center">
+        <div className="rounded-[28px] bg-white border-2 border-outline p-10">
+          <div className="flex justify-center mb-4">
+            <JobPhaseAnimation phase="failed" size={128} />
+          </div>
+          <div className="flex justify-center mb-3">
+            <PillLabel color="pink">Something went wrong</PillLabel>
+          </div>
+          <h2 className="text-3xl mb-2">{job.bookJson?.title || job.topic}</h2>
+          <p className="text-ink-soft mb-6">{job.error?.message || 'Unknown error'}</p>
+          <div className="flex gap-3 justify-center">
+            <Button href="/new" variant="primary" size="md">Start a new book</Button>
+            <Button href="/library" variant="secondary" size="md">Back to library</Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (job.status === 'complete' && job.pdfUrl && job.epubUrl) {
     return (
-      <div className="text-center space-y-4">
-        <h2 className="text-3xl">{job.bookJson?.title || 'Your book'}</h2>
-        <p className="text-[#5D6D7E]">Ready to read.</p>
-        <div className="flex gap-3 justify-center">
-          <a
-            href={job.pdfUrl}
-            className="rounded-full bg-[#5D6D7E] px-6 py-3 text-white font-medium"
-            download
-          >
-            Download PDF
-          </a>
-          <a
-            href={job.epubUrl}
-            className="rounded-full bg-[#E8A87C] px-6 py-3 text-white font-medium"
-            download
-          >
-            Download EPUB
-          </a>
+      <div className="w-full max-w-md mx-auto text-center">
+        <div className="rounded-[28px] bg-white border-2 border-outline p-10 md:p-12">
+          <div className="flex justify-center mb-4">
+            <JobPhaseAnimation phase="done" size={128} />
+          </div>
+          <div className="flex justify-center mb-3">
+            <PillLabel color="mint">Ready</PillLabel>
+          </div>
+          <h2 className="text-3xl md:text-4xl mb-2">{job.bookJson?.title || 'Your book'}</h2>
+          <p className="text-ink-soft mb-6">Ready to read.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+            <Button href={job.pdfUrl} download size="md" variant="primary">Download PDF</Button>
+            <Button href={job.epubUrl} download size="md" variant="secondary">Download EPUB</Button>
+          </div>
+
+          <div className="border-t-2 border-cream-200 pt-6 mt-6">
+            <div className="flex justify-center mb-3">
+              <PillLabel color="yellow">What&apos;s next?</PillLabel>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button href="/new" variant="primary" size="md">Make another book</Button>
+              <CopyShareLinkButton jobId={jobId} />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   const percent = job.progress?.percent ?? 0;
-  const message = job.progress?.message || 'Working...';
+  const message = job.progress?.message || 'Working…';
+  const phase = job.progress?.phase;
 
   return (
-    <div className="w-full max-w-md text-center">
-      <h2 className="text-2xl mb-6">{job.topic}</h2>
-      <div className="w-full bg-white rounded-full h-4 border border-[#E0D9CC] overflow-hidden mb-3">
-        <div
-          className="h-full bg-[#5D6D7E] transition-all duration-500"
-          style={{ width: `${percent}%` }}
-        />
+    <div className="w-full max-w-md mx-auto text-center">
+      <div className="rounded-[28px] bg-white border-2 border-outline p-10 md:p-12">
+        <div className="flex justify-center mb-4">
+          <JobPhaseAnimation phase={phase} size={128} />
+        </div>
+        <div className="flex justify-center mb-3">
+          <PillLabel color="yellow">Making your book</PillLabel>
+        </div>
+        <h2 className="text-3xl mb-6">{job.bookJson?.title || job.topic}</h2>
+
+        {/* Progress bar with dark outline */}
+        <div className="w-full rounded-full border-2 border-outline bg-cream-200 h-5 overflow-hidden mb-3">
+          <div
+            className="h-full bg-sun transition-all duration-500"
+            style={{ width: `${percent}%` }}
+          />
+        </div>
+        <p className="text-ink-soft text-sm">{message}</p>
       </div>
-      <p className="text-[#5D6D7E]">{message}</p>
     </div>
+  );
+}
+
+function CopyShareLinkButton({ jobId }: { jobId: string }) {
+  const [copied, setCopied] = useState(false);
+  async function handleCopy() {
+    const url = `${window.location.origin}/job/${jobId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: do nothing — user can manually copy from the URL bar
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="inline-flex items-center justify-center rounded-full bg-cream border-2 border-outline px-6 py-3 text-base font-medium text-outline hover:bg-cream-200 transition"
+    >
+      {copied ? 'Copied!' : 'Copy share link'}
+    </button>
   );
 }
