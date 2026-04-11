@@ -1,16 +1,32 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from './AuthProvider';
+import Button from '@/components/Button';
+
+const SUGGESTIONS = [
+  'a brave fox who learns to share',
+  'a dragon afraid of the dark',
+  'a moon that visits earth',
+  'a shy whale finding her song',
+];
 
 export function NewBookForm() {
   const { getIdToken } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [topic, setTopic] = useState('');
   const [pages, setPages] = useState(12);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Prefill from ?topic= query param (driven by example chips on the landing / library page).
+  useEffect(() => {
+    const qp = searchParams.get('topic');
+    if (qp && topic === '') setTopic(qp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -36,19 +52,21 @@ export function NewBookForm() {
       }
       const { jobId } = await resp.json();
       router.push(`/job/${jobId}`);
-    } catch (err: any) {
-      setError(err?.message || 'Something went wrong');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong';
+      setError(msg);
       setSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={submit} className="max-w-xl w-full space-y-6">
+    <form onSubmit={submit} className="w-full space-y-7">
       <div>
-        <label className="block text-sm font-medium text-[#5D6D7E] mb-2">
+        <label htmlFor="topic" className="block text-sm font-medium text-ink-soft mb-2">
           What is the book about?
         </label>
         <input
+          id="topic"
           type="text"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
@@ -56,33 +74,50 @@ export function NewBookForm() {
           minLength={3}
           maxLength={200}
           placeholder="a brave little fox who learns to share"
-          className="w-full rounded-2xl border border-[#E0D9CC] bg-white px-5 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-[#5D6D7E]"
+          className="w-full rounded-2xl border-2 border-outline bg-cream px-5 py-4 text-lg font-body focus:outline-none focus:ring-4 focus:ring-sun"
         />
+        <div className="mt-3 flex flex-wrap gap-2">
+          {SUGGESTIONS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setTopic(s)}
+              className="rounded-full bg-cream-200 border border-outline/20 px-3 py-1.5 text-xs text-ink-soft hover:bg-sun hover:text-outline hover:border-outline transition"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-[#5D6D7E] mb-2">
-          How many pages? ({pages})
+        <label htmlFor="pages" className="block text-sm font-medium text-ink-soft mb-2">
+          How many pages? <span className="text-ink font-semibold">{pages}</span>
         </label>
         <input
+          id="pages"
           type="range"
           min={8}
           max={16}
           value={pages}
           onChange={(e) => setPages(parseInt(e.target.value, 10))}
-          className="w-full"
+          className="w-full accent-outline"
         />
+        <div className="flex justify-between text-xs text-ink-soft mt-1">
+          <span>8 — quick bedtime</span>
+          <span>16 — full adventure</span>
+        </div>
       </div>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && (
+        <div className="rounded-2xl bg-blossom border-2 border-outline p-4 text-sm text-outline">
+          {error}
+        </div>
+      )}
 
-      <button
-        type="submit"
-        disabled={submitting || topic.length < 3}
-        className="w-full rounded-full bg-[#5D6D7E] text-white py-4 font-medium text-lg hover:opacity-90 disabled:opacity-50"
-      >
-        {submitting ? 'Starting...' : 'Generate book (1 credit)'}
-      </button>
+      <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting || topic.length < 3}>
+        {submitting ? 'Starting…' : 'Generate book (1 credit)'}
+      </Button>
     </form>
   );
 }
