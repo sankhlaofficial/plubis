@@ -1,24 +1,28 @@
-import Link from 'next/link';
-import { BRAND_NAME, TAGLINE } from '@/lib/brand';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import HeroSection from '@/components/HeroSection';
+import HowItWorks from '@/components/HowItWorks';
+import WhatYouGet from '@/components/WhatYouGet';
+import ExampleBook from '@/components/ExampleBook';
+import Testimonial from '@/components/Testimonial';
+import CloudDivider from '@/components/CloudDivider';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen flex items-center justify-center px-6">
-      <div className="max-w-2xl text-center">
-        <h1 className="text-6xl text-[#2C3E50] mb-6">{BRAND_NAME}</h1>
-        <p className="text-xl text-[#5D6D7E] mb-10">{TAGLINE}</p>
-        <div className="flex gap-4 justify-center">
-          <Link
-            href="/login"
-            className="rounded-full bg-[#5D6D7E] px-8 py-3 text-white font-medium hover:opacity-90"
-          >
-            Make a book — $5
-          </Link>
-        </div>
-        <p className="mt-8 text-sm text-[#A0A0A0]">
-          One credit = one full picture book (PDF + EPUB).
-        </p>
-      </div>
-    </main>
+    <>
+      <Header />
+      <main>
+        <HeroSection />
+        <CloudDivider topColor="#FFCC4D" bottomColor="#FBF8F1" />
+        <HowItWorks />
+        <CloudDivider topColor="#FBF8F1" bottomColor="#D4F0E0" />
+        <WhatYouGet />
+        <CloudDivider topColor="#D4F0E0" bottomColor="#FCE4EC" />
+        <ExampleBook />
+        <CloudDivider topColor="#FCE4EC" bottomColor="#FBF8F1" />
+        <Testimonial />
+      </main>
+      <Footer />
+    </>
   );
 }
