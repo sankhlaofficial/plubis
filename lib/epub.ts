@@ -26,7 +26,18 @@ export async function assembleEpub(input: AssembleEpubInput): Promise<Buffer> {
 
   const pass = new PassThrough();
   const chunks: Buffer[] = [];
-  pass.on('data', (c) => chunks.push(c));
+
+  // CRITICAL: register the completion listener BEFORE archive.finalize() is
+  // called. The original code registered pass.on('end', resolve) AFTER
+  // finalize, which created a race: if the stream had already ended by the
+  // time the listener was attached, the Promise would never resolve and the
+  // route would hang until Vercel killed it at 10s. Discovered during e2e QA
+  // when /api/book/build-epub consistently 504'd while build-pdf returned in 1s.
+  const finished = new Promise<void>((resolve, reject) => {
+    pass.on('data', (c: Buffer) => chunks.push(c));
+    pass.on('end', () => resolve());
+    pass.on('error', reject);
+  });
 
   const archive = archiver('zip', { store: true });
   archive.pipe(pass);
@@ -187,7 +198,7 @@ ${navPoints}
   );
 
   await archive.finalize();
-  await new Promise<void>((resolve) => pass.on('end', () => resolve()));
+  await finished;
 
   return Buffer.concat(chunks);
 }
