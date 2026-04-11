@@ -69,8 +69,10 @@ export async function POST(request: Request) {
   const objectPath = `jobs/${job.jobId}/book.epub`;
   const file = bucket.file(objectPath);
   await file.save(epubBuf, {
-    contentType: 'application/epub+zip',
-    contentDisposition: `attachment; filename="${filename}"`,
+    metadata: {
+      contentType: 'application/epub+zip',
+      contentDisposition: `attachment; filename="${filename}"`,
+    },
     resumable: false,
   });
   const [url] = await file.getSignedUrl({
