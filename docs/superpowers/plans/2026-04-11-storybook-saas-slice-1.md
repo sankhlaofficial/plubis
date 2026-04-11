@@ -2768,13 +2768,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-- [ ] **Step 2: Overwrite app/globals.css**
+- [ ] **Step 2: Append brand CSS to app/globals.css**
 
-Overwrite `app/globals.css`:
+The Tailwind v4 scaffold already created `app/globals.css` with `@import "tailwindcss";` at the top and some default dark-mode CSS variables. **Do not delete the existing `@import "tailwindcss";` line** — Tailwind v4 uses that CSS-first import instead of the v3 `@tailwind base/components/utilities` triplet.
+
+Overwrite `app/globals.css` with the following (which preserves the v4 import and replaces Next.js defaults with our brand CSS):
 ```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --color-cream: #FAF7F2;
@@ -2785,6 +2785,8 @@ Overwrite `app/globals.css`:
 }
 
 body {
+  background: var(--color-cream);
+  color: var(--color-ink);
   font-family: var(--font-body), serif;
 }
 
