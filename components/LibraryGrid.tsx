@@ -8,9 +8,33 @@ import { useAuth } from './AuthProvider';
 import type { Job, User } from '@/lib/types';
 
 export function LibraryGrid() {
-  const { user } = useAuth();
+  const { user, getIdToken } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [credits, setCredits] = useState<number | null>(null);
+  const [buying, setBuying] = useState(false);
+  const [buyError, setBuyError] = useState<string | null>(null);
+
+  async function handleBuyCredit() {
+    setBuying(true);
+    setBuyError(null);
+    try {
+      const token = await getIdToken();
+      if (!token) throw new Error('Not signed in');
+      const resp = await fetch('/api/checkout?product=credit_1', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resp.ok) {
+        const body = await resp.json().catch(() => ({}));
+        throw new Error(body.error || `HTTP ${resp.status}`);
+      }
+      const { url } = await resp.json();
+      if (!url) throw new Error('No checkout URL returned');
+      window.location.href = url;
+    } catch (e: any) {
+      setBuyError(e?.message || 'Could not start checkout');
+      setBuying(false);
+    }
+  }
 
   // Subscribe to user doc for credit balance.
   useEffect(() => {
@@ -46,12 +70,13 @@ export function LibraryGrid() {
           <span className="text-[#5D6D7E]">
             {credits === null ? '...' : `${credits} credit${credits === 1 ? '' : 's'}`}
           </span>
-          <Link
-            href="/api/checkout?product=credit_1"
-            className="rounded-full bg-[#E8A87C] px-5 py-2 text-white font-medium"
+          <button
+            onClick={handleBuyCredit}
+            disabled={buying}
+            className="rounded-full bg-[#E8A87C] px-5 py-2 text-white font-medium hover:opacity-90 disabled:opacity-50"
           >
-            Buy 1 credit — $5
-          </Link>
+            {buying ? 'Opening checkout...' : 'Buy 1 credit — $5'}
+          </button>
           <Link
             href="/new"
             className="rounded-full bg-[#5D6D7E] px-5 py-2 text-white font-medium"
@@ -60,6 +85,10 @@ export function LibraryGrid() {
           </Link>
         </div>
       </div>
+
+      {buyError && (
+        <p className="text-red-600 text-sm mb-4">{buyError}</p>
+      )}
 
       {jobs.length === 0 ? (
         <p className="text-[#5D6D7E]">No books yet. Start with a credit.</p>

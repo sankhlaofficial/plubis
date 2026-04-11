@@ -38,5 +38,9 @@ export async function GET(request: Request) {
     cancelUrl: `${origin}/pricing?purchase=cancelled`,
   });
 
-  return NextResponse.redirect(session.url, 303);
+  // Return JSON instead of a redirect. The browser cannot send the
+  // Authorization header during a plain link navigation, so the client
+  // (LibraryGrid button) calls this via fetch + bearer token, reads the
+  // url field, and does window.location = url to perform the navigation.
+  return NextResponse.json({ url: session.url, sessionId: session.id });
 }
