@@ -10,9 +10,12 @@ import type { Job, User } from '@/lib/types';
 export function LibraryGrid() {
   const { user, getIdToken } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [jobsLoaded, setJobsLoaded] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
+  const [listenerError, setListenerError] = useState<string | null>(null);
+  const [stuck, setStuck] = useState(false);
 
   async function handleBuyCredit() {
     setBuying(true);
@@ -36,13 +39,20 @@ export function LibraryGrid() {
     }
   }
 
-  // Subscribe to user doc for credit balance.
+  // Subscribe to user doc for credit balance. Add an error callback so silent
+  // failures (CSP, ITP, network) surface to the UI instead of leaving the
+  // badge stuck on '...'.
   useEffect(() => {
     if (!user) return;
-    const unsub = onSnapshot(doc(clientDb(), 'users', user.uid), (snap) => {
-      const data = snap.data() as User | undefined;
-      setCredits(data?.credits ?? 0);
-    });
+    const unsub = onSnapshot(
+      doc(clientDb(), 'users', user.uid),
+      (snap) => {
+        const data = snap.data() as User | undefined;
+        setCredits(data?.credits ?? 0);
+        setListenerError(null);
+      },
+      (err) => setListenerError(err.message || 'Failed to load credits'),
+    );
     return () => unsub();
   }, [user]);
 
@@ -54,13 +64,30 @@ export function LibraryGrid() {
       where('userId', '==', user.uid),
       orderBy('createdAt', 'desc'),
     );
-    const unsub = onSnapshot(q, (snap) => {
-      setJobs(
-        snap.docs.map((d) => ({ ...(d.data() as any), jobId: d.id })),
-      );
-    });
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setJobs(snap.docs.map((d) => ({ ...(d.data() as any), jobId: d.id })));
+        setJobsLoaded(true);
+        setListenerError(null);
+      },
+      (err) => setListenerError(err.message || 'Failed to load books'),
+    );
     return () => unsub();
   }, [user]);
+
+  // Show a "still loading?" hint if Firestore hasn't responded after 5s.
+  // Real users on Safari + ITP have hit a race where the first listener
+  // never fires until refresh; this lets them recover without thinking
+  // the app is broken.
+  useEffect(() => {
+    if (credits !== null && jobsLoaded) {
+      setStuck(false);
+      return;
+    }
+    const t = setTimeout(() => setStuck(true), 5000);
+    return () => clearTimeout(t);
+  }, [credits, jobsLoaded]);
 
   return (
     <div className="w-full max-w-5xl">
@@ -90,7 +117,37 @@ export function LibraryGrid() {
         <p className="text-red-600 text-sm mb-4">{buyError}</p>
       )}
 
-      {jobs.length === 0 ? (
+      {listenerError && (
+        <div className="mb-4 rounded-2xl bg-red-50 border border-red-200 p-4">
+          <p className="text-red-700 text-sm font-medium mb-1">Couldn&apos;t load your library.</p>
+          <p className="text-red-600 text-xs mb-3">{listenerError}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-xs underline text-red-700"
+          >
+            Reload page
+          </button>
+        </div>
+      )}
+
+      {!listenerError && stuck && (credits === null || !jobsLoaded) && (
+        <div className="mb-4 rounded-2xl bg-amber-50 border border-amber-200 p-4">
+          <p className="text-amber-800 text-sm font-medium mb-1">Still loading your library...</p>
+          <p className="text-amber-700 text-xs mb-3">
+            This usually means your browser is taking a moment to connect. If it doesn&apos;t finish in another few seconds, try reloading.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-xs underline text-amber-800"
+          >
+            Reload now
+          </button>
+        </div>
+      )}
+
+      {!jobsLoaded ? (
+        <p className="text-[#5D6D7E]">Loading...</p>
+      ) : jobs.length === 0 ? (
         <p className="text-[#5D6D7E]">No books yet. Start with a credit.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
