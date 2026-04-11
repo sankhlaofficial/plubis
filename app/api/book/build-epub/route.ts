@@ -8,7 +8,9 @@ import { assembleEpub } from '@/lib/epub';
 export const runtime = 'nodejs';
 export const maxDuration = 10;
 
-const BodySchema = z.object({ jobId: z.string().min(1) });
+const BodySchema = z.object({
+  jobId: z.string().regex(/^[A-Za-z0-9_-]{1,200}$/),
+});
 
 export async function POST(request: Request) {
   let user;

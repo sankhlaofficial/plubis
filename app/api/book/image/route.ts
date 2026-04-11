@@ -8,7 +8,8 @@ export const runtime = 'nodejs';
 export const maxDuration = 10;
 
 const BodySchema = z.object({
-  jobId: z.string().min(1),
+  // Same character set + length cap as Firestore-safe IDs in /api/book/status.
+  jobId: z.string().regex(/^[A-Za-z0-9_-]{1,200}$/),
   // page=0 is cover, page>=1 is story page index (1-based).
   page: z.number().int().min(0),
 });
