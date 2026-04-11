@@ -1,0 +1,113 @@
+{"id":"C1.01","name":"GET /  →  200","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C1.02","name":"GET /login  →  200","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C1.03","name":"GET /new (auth bounce)","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C1.04","name":"GET /library (auth bounce)","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C1.05","name":"GET /job/test (auth bounce)","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C1.06","name":"GET /404page  →  404","expected":"404","actual":"404","status":"PASS","note":""}
+{"id":"C1.07","name":"GET / with trailing slash","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C1.08","name":"GET /login/ trailing slash","expected":"308","actual":"308","status":"PASS","note":""}
+{"id":"C2.01","name":"GET /api/book/create","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.02","name":"PUT /api/book/create","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.03","name":"DELETE /api/book/create","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.04","name":"PATCH /api/book/create","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.05","name":"POST /api/book/status","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.06","name":"PUT /api/book/status","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.07","name":"DELETE /api/book/status","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.08","name":"GET /api/book/image","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.09","name":"PUT /api/book/image","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.10","name":"GET /api/book/build-pdf","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.11","name":"DELETE /api/book/build-pdf","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.12","name":"GET /api/book/build-epub","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.13","name":"POST /api/checkout","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.14","name":"DELETE /api/checkout","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.15","name":"GET /api/webhooks/dodo","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C2.16","name":"PUT /api/webhooks/dodo","expected":"405","actual":"405","status":"PASS","note":""}
+{"id":"C3.01","name":"POST /api/book/create no auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.02","name":"POST /api/book/create empty auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.03","name":"POST /api/book/create Bearer no token","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.04","name":"POST /api/book/create Bearer xxx","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.05","name":"POST /api/book/create Basic auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.06","name":"POST /api/book/create lowercase 'bearer'","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.07","name":"GET /api/book/status no auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.08","name":"GET /api/book/status no jobId no auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.09","name":"POST /api/book/image no auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.10","name":"POST /api/book/build-pdf no auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.11","name":"POST /api/book/build-epub no auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.12","name":"GET /api/checkout no auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C3.13","name":"GET /api/checkout no product no auth","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C4.01","name":"Webhook no signature","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C4.02","name":"Webhook empty signature","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C4.03","name":"Webhook short signature","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C4.04","name":"Webhook same-length wrong sig","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C4.05","name":"Webhook signature for empty body, posting non-empty","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C4.06","name":"Tampered body, original sig","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C4.07","name":"Valid sig, ignored event","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C4.08","name":"Valid sig, payment.failed","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C4.09","name":"Valid sig, succeeded missing metadata","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C4.10","name":"Succeeded missing creditAmount","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C4.11","name":"Succeeded missing uid","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C4.12","name":"Webhook no body, no sig","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C4.13","name":"Webhook empty body, valid sig","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C4.14","name":"Webhook malformed JSON, valid sig","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C4.15","name":"Refund of unknown payment","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C4.16","name":"Refund missing payment_id","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C4.17","name":"Webhook idempotent ignored 1st","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C4.18","name":"Webhook idempotent ignored 2nd","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C4.19","name":"Webhook subscription.created (ignored)","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C4.20","name":"Webhook unknown event type","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C4.21","name":"Webhook 'event' field instead of 'type'","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C5.01","name":"GET /favicon.ico","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C5.02","name":"GET /robots.txt (Next default)","expected":"404","actual":"404","status":"PASS","note":""}
+{"id":"C5.03","name":"GET /sitemap.xml","expected":"404","actual":"404","status":"PASS","note":""}
+{"id":"C5.04","name":"GET /manifest.json","expected":"404","actual":"404","status":"PASS","note":""}
+{"id":"C5.05","name":"GET /apple-touch-icon.png","expected":"404","actual":"404","status":"PASS","note":""}
+{"id":"C6.01","name":"HSTS header present","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C6.02","name":"X-Content-Type-Options","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C6.03","name":"X-Frame-Options","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C6.04","name":"Content-Security-Policy","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C6.05","name":"Referrer-Policy","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C6.06","name":"Permissions-Policy","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C6.07","name":"HTTP -> HTTPS redirect (308)","expected":"308","actual":"308","status":"PASS","note":""}
+{"id":"C6.08","name":"HTTP redirect to https://plubis.vercel.app/","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C6.09","name":"TLS 1.3 supported","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C6.10","name":"HTTP/2 protocol","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C7.06","name":"Perf / attempt 1 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.07","name":"Perf / attempt 2 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.08","name":"Perf / attempt 3 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.09","name":"Perf / attempt 4 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.10","name":"Perf / attempt 5 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.31","name":"Perf /login attempt 1 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.32","name":"Perf /login attempt 2 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.33","name":"Perf /login attempt 3 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.34","name":"Perf /login attempt 4 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.35","name":"Perf /login attempt 5 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.20.1","name":"API 401 perf attempt 1 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.20.2","name":"API 401 perf attempt 2 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C7.20.3","name":"API 401 perf attempt 3 (<1s)","expected":"ok","actual":"ok","status":"PASS","note":""}
+{"id":"C8.01","name":"Path traversal in route blocked","expected":"4xx","actual":"4xx","status":"PASS","note":""}
+{"id":"C8.02","name":"Encoded path traversal blocked","expected":"4xx","actual":"4xx","status":"PASS","note":""}
+{"id":"C8.03","name":"GET // canonicalized","expected":"308","actual":"308","status":"PASS","note":""}
+{"id":"C8.04","name":"GET /login//","expected":"308","actual":"308","status":"PASS","note":""}
+{"id":"C8.05","name":"GET /?foo=bar","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C8.06","name":"GET /api/checkout no params","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C8.07","name":"GET /api/checkout?product=credit_99","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C8.08","name":"GET /api/checkout?product=","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C8.09","name":"GET /api/checkout?product=<script>","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C8.10","name":"GET very long URL","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C8.11","name":"GET /job/<script>","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C8.12","name":"GET /job/'OR'1'='1","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C9.01","name":"POST empty body to webhook","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C9.02","name":"POST 1MB body to webhook","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C9.03","name":"POST text/plain to webhook","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C9.04","name":"POST no content-type to webhook","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C9.05","name":"SQL injection in payment id","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C9.06","name":"Sanitized XSS-like uid metadata","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C9.07","name":"POST with null byte body","expected":"401","actual":"401","status":"PASS","note":""}
+{"id":"C9.08","name":"Unicode uid metadata","expected":"200","actual":"200","status":"PASS","note":""}
+{"id":"C9.09","name":"Negative creditAmount rejected","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C9.10","name":"Zero creditAmount rejected","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C9.11","name":"Non-numeric creditAmount","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C9.12","name":"Float creditAmount rejected","expected":"400","actual":"400","status":"PASS","note":""}
+{"id":"C10.01","name":"5 parallel ignored events (all 200)","expected":"5","actual":"5","status":"PASS","note":""}
+{"id":"C11.01","name":"Landing page Cache-Control set","expected":"yes","actual":"yes","status":"PASS","note":""}
+{"id":"C11.02","name":"Vercel cache populated","expected":"HIT","actual":"HIT","status":"PASS","note":""}
