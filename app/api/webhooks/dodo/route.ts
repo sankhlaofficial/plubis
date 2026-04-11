@@ -8,15 +8,14 @@ export const maxDuration = 10;
 
 export async function POST(request: Request) {
   const rawBody = await request.text();
-  const signature =
-    request.headers.get('webhook-signature') ||
-    request.headers.get('x-dodo-signature') ||
-    request.headers.get('dodo-signature') ||
-    '';
+  const signature = request.headers.get('webhook-signature') || '';
+  const webhookId = request.headers.get('webhook-id') || '';
+  const webhookTimestamp = request.headers.get('webhook-timestamp') || '';
   const secret = process.env.DODO_WEBHOOK_SECRET || '';
   if (!secret) return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
 
-  if (!verifyDodoSignature(rawBody, signature, secret)) {
+  // Standard Webhooks (svix) verification — see lib/dodo.ts.
+  if (!verifyDodoSignature({ rawBody, signature, webhookId, webhookTimestamp, secret })) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
 
