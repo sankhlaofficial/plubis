@@ -5,11 +5,57 @@ Children's book SaaS. Web sibling of `storybook-agent` CLI. Sells picture-book g
 **Production:** https://plubis.vercel.app
 **Repo:** `sankhlaofficial/plubis` on GitHub, branch `main`, auto-deploys to Vercel on push.
 
-## Current State (April 11, 2026)
+## Current State (April 12, 2026)
 
 - **Slice 1 is live**: full paid flow working — Google sign-in → buy credit → generate book → download PDF + EPUB
 - **UI/UX v2 shipped**: complete design overhaul based on Dribbble 23430521 (yellow-hero children's book look). All 5 pages rebuilt.
+- **GTM Plan approved (April 12)** — pivoted to "conversation books for life's big moments" (see `GTM Positioning` below). Slice 2 product changes are the next build.
 - **Working tree is clean.** All commits pushed to `main`.
+
+## GTM Positioning (locked in April 12, 2026)
+
+**The moat is NOT "another AI children's book generator." It's "picture books for life's big moments."** Plubis owns the category of AI-generated *conversation books* — books that help parents talk to their kids about specific emotional situations (new sibling, first day of school, grief, divorce, nightmares, etc.). No dominant competitor has claimed this category.
+
+**New H1 copy:** "A book for the hard things to explain. Generated in 5 minutes. Your first one is free."
+
+**Constraints driving the plan:**
+- Founder is in India targeting US audience → **no physical product, no hardcover, no Lulu fulfillment**
+- Founder will NOT put his face on the brand → **no founder videos/photos, no personal-brand content**
+- Zero warm audience → **everything is cold**, brand runs from @plubis_app (new handle), NOT @aditya_sankhla_
+- Budget: **$30/month**, 4-week sprint, ~10 hrs/week
+
+**Regulatory guardrail:** Market as "conversation books" or "books for hard conversations." Never "therapy," "treatment," "cure," or any medical claim. Standard disclaimer: "Not a substitute for professional mental health care."
+
+**Full plan:** `/Users/divyanshkumar/.claude/plans/quiet-tinkering-gray.md` (Section 0.4 is the authoritative version — supersedes Sections 0.5-0.10).
+
+## Slice 2 Product Changes (Next Build — ~1.5 coding days)
+
+These ship BEFORE any marketing. The product IS the marketing.
+
+1. **Child's Name field** on `components/NewBookForm.tsx` → feeds `lib/prompts.ts` + dedication page (45 min)
+2. **Hidden Dedication Page** auto-rendered at start of every PDF + EPUB. Handwritten font (Google Fonts: Caveat or Dancing Script). No Plubis branding. Format: "This book was made for [Name], on [Date], by [Parent First Name], who loves them more than words can say." (1 hr) — `lib/pdf.ts`, `lib/epub.ts`
+3. **Free first book** in exchange for email + child's name. Change paywall — first credit is free on signup. (2 hr) — `lib/credits.ts`, `app/api/book/create/route.ts`, AuthProvider
+4. **Situation Picker** on new-book form — dropdown of ~20 curated emotional situations + "Other" text field. This is the MOAT. (3 hr) — `components/NewBookForm.tsx`, new `lib/situations.ts`, `lib/prompts.ts`
+5. **20 Situation Prompt Templates** in `lib/situations.ts` — each a carefully-crafted paragraph describing age-appropriate emotional framing for one situation. (~1 day of research + writing). Situations: new sibling, first day of school, grief (pet), grief (grandparent), divorce/separation, moving, nightmares, doctor visit, dentist visit, potty regression, parent travel, deployment, big feelings, tantrums, new pet, lost friend, new school, new language, parent illness, other. Tag each with age range 2-4 / 4-7.
+6. **De-brand the book interior** — strip all Plubis mentions from PDF. Only the colophon on the back matter can have a tiny "Made with Plubis" line. (15 min) — `lib/pdf.ts`
+7. **Multi-book credit packs** — `credit_3` ($12) and `credit_10` ($35) products in Dodo, wired into `app/api/checkout/route.ts` and `components/PricingModal.tsx` (new). (2 hr)
+8. **Family Library subscription** ($9.99/mo) — LAUNCH IN WEEK 2 ONLY if Week 1 validates demand. Don't add to MVP.
+9. **Faceless About page** — `app/about/page.tsx`. Tells the product story and the category mission. No founder photo. No "I" voice — use "we" or neutral product language. (1 hr)
+
+## GTM Prerequisites (also ship before Week 1 marketing)
+
+10. Buy domain on Porkbun (plubis.app / plubis.io / plubis.co) — ~$12-25/year
+11. Fix `NEXT_PUBLIC_DOMAIN` in `.env.local` → new domain
+12. Install PostHog free tier + Vercel Analytics (event tracking + funnel)
+13. Create `app/sitemap.ts` + `app/robots.ts`
+14. Verify domain with Google Search Console + submit sitemap
+15. Regenerate OG image + favicon with Flux Schnell (faceless — product imagery only)
+16. Build email capture form + Firestore `leads` collection → Resend welcome sequence
+17. Add `/thank-you` page with share CTA (pre-filled tweet template, no Plubis branding required)
+
+## Programmatic SEO Plan (the sleeper channel)
+
+Generate **125 long-tail blog articles** via Claude API using a template: "The best picture book to read to a [AGE]-year-old about [SITUATION]". 5 ages × 25 situations = 125 articles. Each ~1500 words. Each CTA points to Plubis with "Or make your own in 5 minutes — first one free." Cost: ~$4 total via Anthropic API. Publish as `app/blog/[slug]/page.tsx` reading from MDX files. Submit sitemap to GSC. Pays back in Month 2-3, compounds forever.
 
 ## Stack
 
