@@ -12,11 +12,20 @@ const SUGGESTIONS = [
   'a shy whale finding her song',
 ];
 
+// Derive a first-name-only string from a full display name so the hidden
+// dedication page reads naturally. Falls back to an empty string for callers
+// to handle — the create route will set a generic fallback if we pass nothing.
+function firstToken(full: string | null | undefined): string {
+  if (!full) return '';
+  return full.trim().split(/\s+/)[0] || '';
+}
+
 export function NewBookForm() {
-  const { getIdToken } = useAuth();
+  const { user, getIdToken } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [topic, setTopic] = useState('');
+  const [childName, setChildName] = useState('');
   const [pages, setPages] = useState(12);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,13 +43,21 @@ export function NewBookForm() {
     setError(null);
     try {
       const token = await getIdToken();
+      // Parent first name is derived silently from the Firebase displayName so
+      // the dedication page stays hidden — the parent discovers it in the PDF.
+      const parentFirstName = firstToken(user?.displayName);
       const resp = await fetch('/api/book/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ topic, pages }),
+        body: JSON.stringify({
+          topic,
+          pages,
+          childName: childName.trim() || null,
+          parentFirstName: parentFirstName || null,
+        }),
       });
       if (resp.status === 402) {
         router.push('/pricing');
@@ -61,6 +78,27 @@ export function NewBookForm() {
 
   return (
     <form onSubmit={submit} className="w-full space-y-7">
+      <div>
+        <label htmlFor="childName" className="block text-sm font-medium text-ink-soft mb-2">
+          Who is the book for?
+        </label>
+        <input
+          id="childName"
+          type="text"
+          value={childName}
+          onChange={(e) => setChildName(e.target.value)}
+          required
+          minLength={1}
+          maxLength={60}
+          placeholder="Your child's first name"
+          autoComplete="off"
+          className="w-full rounded-2xl border-2 border-outline bg-cream px-5 py-4 text-lg font-body focus:outline-none focus:ring-4 focus:ring-sun"
+        />
+        <p className="mt-2 text-xs text-ink-soft">
+          We'll use their name in the story and on a little dedication page.
+        </p>
+      </div>
+
       <div>
         <label htmlFor="topic" className="block text-sm font-medium text-ink-soft mb-2">
           What is the book about?
@@ -115,7 +153,13 @@ export function NewBookForm() {
         </div>
       )}
 
-      <Button type="submit" variant="primary" size="lg" fullWidth disabled={submitting || topic.length < 3}>
+      <Button
+        type="submit"
+        variant="primary"
+        size="lg"
+        fullWidth
+        disabled={submitting || topic.length < 3 || childName.trim().length < 1}
+      >
         {submitting ? 'Starting…' : 'Generate book (1 credit)'}
       </Button>
     </form>

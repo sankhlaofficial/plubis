@@ -17,6 +17,7 @@ const BodySchema = z.object({
   childAge: z.number().int().min(0).max(18).optional().nullable(),
   childDescription: z.string().max(500).optional().nullable(),
   artStyle: z.string().max(60).optional().nullable(),
+  parentFirstName: z.string().max(60).optional().nullable(),
 });
 
 export async function POST(request: Request) {
@@ -66,6 +67,7 @@ export async function POST(request: Request) {
         childAge: parsed.data.childAge ?? null,
         childDescription: parsed.data.childDescription ?? null,
         artStyle: parsed.data.artStyle ?? null,
+        parentFirstName: parsed.data.parentFirstName ?? null,
         pages: parsed.data.pages,
         sessionId: '',
         lastEventCursor: null,

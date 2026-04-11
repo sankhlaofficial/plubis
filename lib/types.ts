@@ -58,6 +58,7 @@ export interface Job {
   childAge: number | null;
   childDescription: string | null;
   artStyle: string | null;
+  parentFirstName: string | null;
   pages: number;
   sessionId: string;
   lastEventCursor: string | null;

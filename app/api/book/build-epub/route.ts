@@ -50,10 +50,17 @@ export async function POST(request: Request) {
     progress: { phase: 'building-epub', message: 'Assembling the EPUB...', percent: 95 },
   });
 
+  // Pull the dedication date from the job's createdAt timestamp so every
+  // rebuild of the same job produces the same date on the dedication page.
+  const dedicationDate: Date = job.createdAt?.toDate ? job.createdAt.toDate() : new Date();
+
   const epubBuf = await assembleEpub({
     manifest: job.bookJson,
     coverBytes: coverBytes ? new Uint8Array(coverBytes) : null,
     pageBytes: pageBytesArr,
+    childName: job.childName ?? null,
+    parentFirstName: job.parentFirstName ?? null,
+    dedicationDate,
   });
 
   // Build a safe filename from the book title so the downloaded file lands as
