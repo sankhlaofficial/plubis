@@ -1,15 +1,47 @@
-node_modules/
-.next/
-out/
-dist/
-build/
+
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 .DS_Store
 .env
-.env.local
 .env.*.local
-*.log
-.vercel/
-.turbo/
-coverage/
+.env.local
+.env*
 .firebase/
+.next/
+.pnp.*
+.pnpm-debug.log*
+.turbo/
+.vercel
+.vercel/
+.yarn/*
+*.log
+*.pem
+*.tsbuildinfo
+/.next/
+/.pnp
+/build
+/coverage
+/node_modules
+/out/
+# debug
+# dependencies
+# env files (can opt-in for committing if needed)
+# misc
+# next.js
+# production
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# testing
+# typescript
+# vercel
+build/
+coverage/
+dist/
+next-env.d.ts
+node_modules/
+npm-debug.log*
+out/
 service-account*.json
+yarn-debug.log*
+yarn-error.log*
