@@ -46,13 +46,32 @@ function CreditPill({
     );
   }
 
+  // credits > 0: show balance link + small "+ Buy more" button side-by-side
   return (
-    <Link
-      href="/new"
-      className="pill bg-mint border-2 border-outline px-4 py-2 text-xs font-medium"
-    >
-      {credits} credit{credits === 1 ? '' : 's'}
-    </Link>
+    <div className="flex items-center gap-1">
+      <Link
+        href="/new"
+        className="pill bg-mint border-2 border-outline px-4 py-2 text-xs font-medium"
+      >
+        {credits} credit{credits === 1 ? '' : 's'}
+      </Link>
+      <button
+        type="button"
+        onClick={onBuy}
+        aria-label="Buy more credits"
+        title="Buy more credits"
+        className="w-8 h-8 rounded-full bg-sun border-2 border-outline flex items-center justify-center hover:bg-sun-600 transition"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+          <path
+            d="M7 1V13M1 7H13"
+            stroke="#0F172A"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
+    </div>
   );
 }
 
@@ -192,6 +211,8 @@ export default function Header() {
         signedIn={!!user}
         onSignOut={handleSignOut}
         credits={credits}
+        onBuy={handleBuy}
+        buying={buying}
       />
     </header>
   );

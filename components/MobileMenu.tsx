@@ -9,6 +9,8 @@ interface MobileMenuProps {
   signedIn: boolean;
   onSignOut?: () => void;
   credits: number | null;
+  onBuy?: () => void;
+  buying?: boolean;
 }
 
 export default function MobileMenu({
@@ -18,6 +20,8 @@ export default function MobileMenu({
   signedIn,
   onSignOut,
   credits,
+  onBuy,
+  buying,
 }: MobileMenuProps) {
   return (
     <>
@@ -74,8 +78,23 @@ export default function MobileMenu({
         </nav>
 
         {signedIn && credits !== null && (
-          <div className="pill bg-mint border-2 border-outline px-4 py-2 text-sm font-medium self-start">
-            {credits} credit{credits === 1 ? '' : 's'}
+          <div className="flex flex-col gap-3 items-start">
+            <div className="pill bg-mint border-2 border-outline px-4 py-2 text-sm font-medium">
+              {credits} credit{credits === 1 ? '' : 's'}
+            </div>
+            {onBuy && (
+              <button
+                type="button"
+                onClick={() => {
+                  onBuy();
+                  onClose();
+                }}
+                disabled={buying}
+                className="inline-flex items-center gap-2 rounded-full bg-sun border-2 border-outline px-5 py-3 text-sm font-medium text-outline shadow-[0_4px_0_0_#0F172A] hover:translate-y-[1px] hover:shadow-[0_3px_0_0_#0F172A] transition disabled:opacity-50"
+              >
+                {buying ? 'Opening checkout…' : 'Buy more credits — $5'}
+              </button>
+            )}
           </div>
         )}
 
