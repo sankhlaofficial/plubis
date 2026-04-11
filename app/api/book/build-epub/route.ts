@@ -56,12 +56,27 @@ export async function POST(request: Request) {
     pageBytes: pageBytesArr,
   });
 
+  // Build a safe filename from the book title so the downloaded file lands as
+  // e.g. "lunas-little-song.epub" instead of a UUID hash. Falls back to
+  // "plubis-book" if the title is missing.
+  const slug = (job.bookJson?.title || 'plubis-book')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || 'plubis-book';
+  const filename = `${slug}.epub`;
+
   const objectPath = `jobs/${job.jobId}/book.epub`;
   const file = bucket.file(objectPath);
-  await file.save(epubBuf, { contentType: 'application/epub+zip', resumable: false });
+  await file.save(epubBuf, {
+    contentType: 'application/epub+zip',
+    contentDisposition: `attachment; filename="${filename}"`,
+    resumable: false,
+  });
   const [url] = await file.getSignedUrl({
     action: 'read',
     expires: Date.now() + 24 * 60 * 60 * 1000,
+    responseDisposition: `attachment; filename="${filename}"`,
   });
 
   await jobRef.update({
