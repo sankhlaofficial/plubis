@@ -1,0 +1,123 @@
+{"id":"AC1.01","status":"PASS","name":"GET /api/book/status?jobId=nonexistent (auth OK)"}
+{"id":"AC1.02","status":"PASS","name":"GET /api/checkout?product=credit_1 (auth OK, redirect)"}
+{"id":"AC1.03","status":"PASS","name":"GET /api/checkout?product=credit_99 (auth OK, unknown product)"}
+{"id":"AC1.04","status":"PASS","name":"GET /api/checkout?product= (empty falls through to default)"}
+{"id":"AC2.01","status":"PASS","name":"POST empty body"}
+{"id":"AC2.02","status":"PASS","name":"POST {}"}
+{"id":"AC2.03","status":"PASS","name":"POST malformed JSON"}
+{"id":"AC2.04","status":"PASS","name":"POST missing topic"}
+{"id":"AC2.05","status":"PASS","name":"POST missing pages (default 12)"}
+{"id":"AC2.06","status":"PASS","name":"POST topic 1 char"}
+{"id":"AC2.07","status":"PASS","name":"POST topic 2 chars"}
+{"id":"AC2.08","status":"PASS","name":"POST topic 3 chars (min)"}
+{"id":"AC2.09","status":"FAIL","name":"POST topic 199 chars (at max, len=199)","expected_list":"200 402","actual":"400","note":"400"}
+{"id":"AC2.10","status":"PASS","name":"POST topic 201 chars (len=201)"}
+{"id":"AC2.11","status":"PASS","name":"POST topic 5000 chars (len=5000)"}
+{"id":"AC2.12","status":"PASS","name":"POST pages 0"}
+{"id":"AC2.13","status":"PASS","name":"POST pages 1"}
+{"id":"AC2.14","status":"PASS","name":"POST pages 7 (below min)"}
+{"id":"AC2.15","status":"PASS","name":"POST pages 8 (min)"}
+{"id":"AC2.16","status":"PASS","name":"POST pages 12 (default-ish)"}
+{"id":"AC2.17","status":"PASS","name":"POST pages 16 (max)"}
+{"id":"AC2.18","status":"PASS","name":"POST pages 17 (above max)"}
+{"id":"AC2.19","status":"PASS","name":"POST pages 100"}
+{"id":"AC2.20","status":"PASS","name":"POST pages -5"}
+{"id":"AC2.21","status":"PASS","name":"POST pages 12.5 (float)"}
+{"id":"AC2.22","status":"PASS","name":"POST pages "twelve" (string)"}
+{"id":"AC2.23","status":"PASS","name":"POST pages null"}
+{"id":"AC2.24","status":"PASS","name":"POST childName valid"}
+{"id":"AC2.25","status":"PASS","name":"POST childName empty string"}
+{"id":"AC2.26","status":"PASS","name":"POST childName null"}
+{"id":"AC2.27","status":"FAIL","name":"POST childName 59 chars (near max, len=59)","expected_list":"200 402","actual":"400","note":"400"}
+{"id":"AC2.28","status":"PASS","name":"POST childName 61 chars (over, len=61)"}
+{"id":"AC2.29","status":"PASS","name":"POST childName unicode"}
+{"id":"AC2.30","status":"PASS","name":"POST childName emoji"}
+{"id":"AC2.31","status":"PASS","name":"POST childAge 0"}
+{"id":"AC2.32","status":"PASS","name":"POST childAge 5"}
+{"id":"AC2.33","status":"PASS","name":"POST childAge 18 (max)"}
+{"id":"AC2.34","status":"PASS","name":"POST childAge 19"}
+{"id":"AC2.35","status":"PASS","name":"POST childAge -1"}
+{"id":"AC2.36","status":"PASS","name":"POST childAge 5.5 (float)"}
+{"id":"AC2.37","status":"PASS","name":"POST childAge "five""}
+{"id":"AC2.38","status":"PASS","name":"POST childAge null"}
+{"id":"AC2.39","status":"PASS","name":"POST childDescription valid"}
+{"id":"AC2.40","status":"FAIL","name":"POST childDescription 499 chars (near max, len=499)","expected_list":"200 402","actual":"400","note":"400"}
+{"id":"AC2.41","status":"PASS","name":"POST childDescription 501 chars (len=501)"}
+{"id":"AC2.42","status":"PASS","name":"POST artStyle valid"}
+{"id":"AC2.43","status":"FAIL","name":"POST artStyle 59 chars (near max, len=59)","expected_list":"200 402","actual":"400","note":"400"}
+{"id":"AC2.44","status":"PASS","name":"POST artStyle 61 chars (len=61)"}
+{"id":"AC2.45","status":"PASS","name":"POST topic with emoji"}
+{"id":"AC2.46","status":"PASS","name":"POST topic with unicode CJK"}
+{"id":"AC2.47","status":"PASS","name":"POST topic with HTML tags"}
+{"id":"AC2.48","status":"PASS","name":"POST topic with SQL injection"}
+{"id":"AC2.49","status":"PASS","name":"POST topic with XSS payload"}
+{"id":"AC2.50","status":"PASS","name":"POST topic with newlines"}
+{"id":"AC2.51","status":"PASS","name":"POST topic with tabs"}
+{"id":"AC2.52","status":"PASS","name":"POST topic with quotes"}
+{"id":"AC2.53","status":"PASS","name":"POST topic with backslashes"}
+{"id":"AC2.54","status":"PASS","name":"POST topic with Arabic RTL"}
+{"id":"AC2.55","status":"PASS","name":"POST topic with Hebrew RTL"}
+{"id":"AC2.56","status":"PASS","name":"POST all optional fields filled"}
+{"id":"AC2.57","status":"PASS","name":"POST text/plain content-type"}
+{"id":"AC2.58","status":"PASS","name":"POST no content-type (Next.js infers JSON)"}
+{"id":"AC2.59","status":"PASS","name":"POST with unexpected field"}
+{"id":"AC2.60","status":"PASS","name":"POST topic as number"}
+{"id":"AC2.61","status":"PASS","name":"POST topic as array"}
+{"id":"AC2.62","status":"PASS","name":"POST topic as object"}
+{"id":"AC2.63","status":"PASS","name":"POST topic as boolean"}
+{"id":"AC2.64","status":"PASS","name":"POST topic null"}
+{"id":"AC3.01","status":"PASS","name":"GET status no jobId param (auth OK)"}
+{"id":"AC3.02","status":"PASS","name":"GET status empty jobId"}
+{"id":"AC3.03","status":"PASS","name":"GET status nonexistent jobId"}
+{"id":"AC3.04","status":"PASS","name":"GET status jobId with spaces (invalid format)"}
+{"id":"AC3.05","status":"PASS","name":"GET status SQL injection jobId (invalid format)"}
+{"id":"AC3.06","status":"PASS","name":"GET status XSS jobId (invalid format)"}
+{"id":"AC3.07","status":"PASS","name":"GET status 2000-char jobId (over max)"}
+{"id":"AC4.01","status":"PASS","name":"POST image empty body"}
+{"id":"AC4.02","status":"PASS","name":"POST image {}"}
+{"id":"AC4.03","status":"PASS","name":"POST image missing jobId"}
+{"id":"AC4.04","status":"PASS","name":"POST image missing page"}
+{"id":"AC4.05","status":"PASS","name":"POST image jobId=nonexistent page=0"}
+{"id":"AC4.06","status":"PASS","name":"POST image page negative"}
+{"id":"AC4.07","status":"PASS","name":"POST image page float"}
+{"id":"AC4.08","status":"PASS","name":"POST image page string"}
+{"id":"AC4.09","status":"PASS","name":"POST image jobId empty string"}
+{"id":"AC4.10","status":"PASS","name":"POST image both null"}
+{"id":"AC5.01","status":"PASS","name":"POST build-pdf empty body"}
+{"id":"AC5.02","status":"PASS","name":"POST build-pdf {}"}
+{"id":"AC5.03","status":"PASS","name":"POST build-pdf missing jobId"}
+{"id":"AC5.04","status":"PASS","name":"POST build-pdf nonexistent jobId"}
+{"id":"AC5.05","status":"PASS","name":"POST build-pdf empty jobId"}
+{"id":"AC5.06","status":"PASS","name":"POST build-pdf null jobId"}
+{"id":"AC5.07","status":"PASS","name":"POST build-pdf number jobId"}
+{"id":"AC5.08","status":"PASS","name":"POST build-pdf array jobId"}
+{"id":"AC6.01","status":"PASS","name":"POST build-epub empty body"}
+{"id":"AC6.02","status":"PASS","name":"POST build-epub {}"}
+{"id":"AC6.03","status":"PASS","name":"POST build-epub missing jobId"}
+{"id":"AC6.04","status":"PASS","name":"POST build-epub nonexistent jobId"}
+{"id":"AC6.05","status":"PASS","name":"POST build-epub empty jobId"}
+{"id":"AC6.06","status":"PASS","name":"POST build-epub null jobId"}
+{"id":"AC6.07","status":"PASS","name":"POST build-epub number jobId"}
+{"id":"AC7.01","status":"PASS","name":"GET checkout credit_1 (default)"}
+{"id":"AC7.02","status":"PASS","name":"GET checkout no product (defaults to credit_1)"}
+{"id":"AC7.03","status":"PASS","name":"GET checkout credit_5 (Slice 2)"}
+{"id":"AC7.04","status":"PASS","name":"GET checkout credit_20 (Slice 2)"}
+{"id":"AC7.05","status":"PASS","name":"GET checkout credit_99 (unknown)"}
+{"id":"AC7.06","status":"PASS","name":"GET checkout product=foo"}
+{"id":"AC7.07","status":"PASS","name":"GET checkout product= (empty defaults to credit_1)"}
+{"id":"AC7.08","status":"PASS","name":"GET checkout product=<script>"}
+{"id":"AC7.09","status":"PASS","name":"GET checkout product='OR'1'='1"}
+{"id":"AC7.10","status":"PASS","name":"GET checkout very long product"}
+{"id":"AC8.01","status":"PASS","name":"GET status with truncated token"}
+{"id":"AC8.02","status":"PASS","name":"GET status with appended garbage"}
+{"id":"AC8.03","status":"PASS","name":"GET status with first char tampered"}
+{"id":"AC8.04","status":"PASS","name":"GET status with empty Bearer"}
+{"id":"AC8.05","status":"PASS","name":"GET status with 'Bearer<token>'"}
+{"id":"AC8.06","status":"PASS","name":"GET status with 'Bearer   <token>' (multi-space)"}
+{"id":"AC8.07","status":"PASS","name":"GET status with 'bearer <token>' (lowercase)"}
+{"id":"AC9.01","status":"PASS","name":"Authed API status #1 (<2s incl. token verify)"}
+{"id":"AC9.02","status":"PASS","name":"Authed API status #2 (<2s incl. token verify)"}
+{"id":"AC9.03","status":"PASS","name":"Authed API status #3 (<2s incl. token verify)"}
+{"id":"AC9.04","status":"PASS","name":"Authed API status #4 (<2s incl. token verify)"}
+{"id":"AC9.05","status":"PASS","name":"Authed API status #5 (<2s incl. token verify)"}
+{"id":"AC9.06","status":"PASS","name":"10 concurrent status calls all 404 (no crash)"}
