@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users: read own doc. Display name + lastActiveAt can be updated by the client.
+    // Credit field is server-only.
+    match /users/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow update: if request.auth != null
+                    && request.auth.uid == uid
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                       .hasOnly(['displayName', 'lastActiveAt']);
+      allow create: if false;
+      allow delete: if false;
+    }
+
+    // Jobs: read-only for owner. All writes go through Admin SDK.
+    match /jobs/{jobId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == resource.data.userId;
+      allow write: if false;
+    }
+
+    // Credit transactions: read-only for owner. No client writes.
+    match /credit_txns/{txnId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == resource.data.userId;
+      allow write: if false;
+    }
+
+    // Deny anything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
