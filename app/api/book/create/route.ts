@@ -18,6 +18,8 @@ const BodySchema = z.object({
   childDescription: z.string().max(500).optional().nullable(),
   artStyle: z.string().max(60).optional().nullable(),
   parentFirstName: z.string().max(60).optional().nullable(),
+  situationSlug: z.string().max(60).optional().nullable(),
+  situationOther: z.string().max(500).optional().nullable(),
 });
 
 export async function POST(request: Request) {
@@ -68,6 +70,8 @@ export async function POST(request: Request) {
         childDescription: parsed.data.childDescription ?? null,
         artStyle: parsed.data.artStyle ?? null,
         parentFirstName: parsed.data.parentFirstName ?? null,
+        situationSlug: parsed.data.situationSlug ?? null,
+        situationOther: parsed.data.situationOther ?? null,
         pages: parsed.data.pages,
         sessionId: '',
         lastEventCursor: null,

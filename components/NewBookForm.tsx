@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from './AuthProvider';
 import Button from '@/components/Button';
+import { SITUATIONS, SITUATION_OTHER, getSituation } from '@/lib/situations';
 
 const SUGGESTIONS = [
   'a brave fox who learns to share',
@@ -26,6 +27,8 @@ export function NewBookForm() {
   const searchParams = useSearchParams();
   const [topic, setTopic] = useState('');
   const [childName, setChildName] = useState('');
+  const [situationSlug, setSituationSlug] = useState<string>('');
+  const [situationOther, setSituationOther] = useState('');
   const [pages, setPages] = useState(12);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,6 +60,11 @@ export function NewBookForm() {
           pages,
           childName: childName.trim() || null,
           parentFirstName: parentFirstName || null,
+          situationSlug: situationSlug || null,
+          situationOther:
+            situationSlug === SITUATION_OTHER && situationOther.trim().length > 0
+              ? situationOther.trim()
+              : null,
         }),
       });
       if (resp.status === 402) {
@@ -100,8 +108,51 @@ export function NewBookForm() {
       </div>
 
       <div>
+        <label htmlFor="situation" className="block text-sm font-medium text-ink-soft mb-2">
+          What's going on in their world?{' '}
+          <span className="text-muted font-normal">(optional)</span>
+        </label>
+        <select
+          id="situation"
+          value={situationSlug}
+          onChange={(e) => setSituationSlug(e.target.value)}
+          className="w-full rounded-2xl border-2 border-outline bg-cream px-5 py-4 text-lg font-body focus:outline-none focus:ring-4 focus:ring-sun appearance-none"
+        >
+          <option value="">Nothing in particular — just a cozy story</option>
+          {SITUATIONS.map((s) => (
+            <option key={s.slug} value={s.slug}>
+              {s.label}
+            </option>
+          ))}
+          <option value={SITUATION_OTHER}>Something else…</option>
+        </select>
+        {situationSlug && situationSlug !== SITUATION_OTHER && (
+          <p className="mt-2 text-xs italic text-ink-soft">
+            {getSituation(situationSlug)?.hint}
+          </p>
+        )}
+        {situationSlug === SITUATION_OTHER && (
+          <textarea
+            value={situationOther}
+            onChange={(e) => setSituationOther(e.target.value)}
+            maxLength={500}
+            rows={3}
+            required
+            placeholder="Tell us what's going on — we'll shape the story around it."
+            className="mt-3 w-full rounded-2xl border-2 border-outline bg-cream px-5 py-3 text-base font-body focus:outline-none focus:ring-4 focus:ring-sun resize-none"
+          />
+        )}
+        {!situationSlug && (
+          <p className="mt-2 text-xs text-ink-soft">
+            If your child is going through a hard moment, picking it helps us
+            shape the book around the feeling — not just the story.
+          </p>
+        )}
+      </div>
+
+      <div>
         <label htmlFor="topic" className="block text-sm font-medium text-ink-soft mb-2">
-          What is the book about?
+          What kind of story?
         </label>
         <input
           id="topic"
@@ -158,7 +209,12 @@ export function NewBookForm() {
         variant="primary"
         size="lg"
         fullWidth
-        disabled={submitting || topic.length < 3 || childName.trim().length < 1}
+        disabled={
+          submitting ||
+          topic.length < 3 ||
+          childName.trim().length < 1 ||
+          (situationSlug === SITUATION_OTHER && situationOther.trim().length < 3)
+        }
       >
         {submitting ? 'Starting…' : 'Generate book (1 credit)'}
       </Button>
