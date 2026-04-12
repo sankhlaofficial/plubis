@@ -124,6 +124,7 @@ export default function Header() {
       ];
 
   return (
+    <>
     <header className="sticky top-0 z-30 bg-cream/95 backdrop-blur border-b border-cream-200">
       <div className="container-prose flex items-center justify-between px-6 py-4">
         <Logo size="sm" />
@@ -206,7 +207,10 @@ export default function Header() {
         buying={buying}
       />
 
-      <PricingModal open={pricingOpen} onClose={() => setPricingOpen(false)} />
     </header>
+    {pricingOpen && (
+      <PricingModal open={pricingOpen} onClose={() => setPricingOpen(false)} />
+    )}
+    </>
   );
 }
