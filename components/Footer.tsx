@@ -33,6 +33,11 @@ export default function Footer() {
                 Your library
               </Link>
             </li>
+            <li>
+              <Link href="/blog" className="hover:underline">
+                Guides
+              </Link>
+            </li>
           </ul>
         </div>
 

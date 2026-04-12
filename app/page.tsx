@@ -4,6 +4,7 @@ import HeroSection from '@/components/HeroSection';
 import HowItWorks from '@/components/HowItWorks';
 import WhatYouGet from '@/components/WhatYouGet';
 import ExampleBook from '@/components/ExampleBook';
+import BlogGuides from '@/components/BlogGuides';
 import Testimonial from '@/components/Testimonial';
 import CloudDivider from '@/components/CloudDivider';
 
@@ -20,6 +21,8 @@ export default function HomePage() {
         <CloudDivider topColor="#D4F0E0" bottomColor="#FCE4EC" />
         <ExampleBook />
         <CloudDivider topColor="#FCE4EC" bottomColor="#FBF8F1" />
+        <BlogGuides />
+        <CloudDivider topColor="#FBF8F1" bottomColor="#FBF8F1" />
         <Testimonial />
       </main>
       <Footer />
