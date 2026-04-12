@@ -52,15 +52,16 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
       />
       {/* Modal */}
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${
+        className={`fixed inset-0 z-50 overflow-y-auto transition-opacity duration-200 ${
           open ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="pricing-modal-title"
       >
+        <div className="min-h-full flex items-center justify-center p-4">
         <div
-          className="w-full max-w-3xl bg-cream border-2 border-outline rounded-3xl shadow-[0_8px_0_0_#0F172A] p-5 sm:p-8 max-h-[90vh] overflow-y-auto"
+          className="w-full max-w-3xl bg-cream border-2 border-outline rounded-3xl shadow-[0_8px_0_0_#0F172A] p-5 sm:p-8 my-4"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close */}
@@ -113,6 +114,7 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
           <p className="mt-6 text-xs text-ink-soft text-center">
             Credits never expire. Every book includes PDF + EPUB downloads.
           </p>
+        </div>
         </div>
       </div>
     </>
