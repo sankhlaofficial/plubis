@@ -60,7 +60,7 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
         aria-labelledby="pricing-modal-title"
       >
         <div
-          className="w-full max-w-4xl bg-cream border-2 border-outline rounded-3xl shadow-[0_8px_0_0_#0F172A] p-6 sm:p-10 max-h-[90vh] overflow-y-auto"
+          className="w-full max-w-3xl bg-cream border-2 border-outline rounded-3xl shadow-[0_8px_0_0_#0F172A] p-5 sm:p-8 max-h-[90vh] overflow-y-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close */}
@@ -93,7 +93,7 @@ export default function PricingModal({ open, onClose }: PricingModalProps) {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
             {CREDIT_PRODUCTS.map((p) => (
               <PricingCard
                 key={p.key}
