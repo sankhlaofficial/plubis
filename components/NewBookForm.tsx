@@ -40,10 +40,21 @@ export function NewBookForm() {
   const [credits, setCredits] = useState<number | null>(null);
   const [totalBooksGenerated, setTotalBooksGenerated] = useState<number | null>(null);
 
-  // Prefill from ?topic= query param (driven by example chips on the landing / library page).
+  // Prefill from query params. ?topic= is driven by the landing page + blog
+  // CTAs; ?situation= is driven by blog article CTAs that deep-link into the
+  // picker with a specific situation pre-selected.
   useEffect(() => {
-    const qp = searchParams.get('topic');
-    if (qp && topic === '') setTopic(qp);
+    const topicQp = searchParams.get('topic');
+    if (topicQp && topic === '') setTopic(topicQp);
+    const situationQp = searchParams.get('situation');
+    if (
+      situationQp &&
+      situationSlug === '' &&
+      (situationQp === SITUATION_OTHER ||
+        SITUATIONS.some((s) => s.slug === situationQp))
+    ) {
+      setSituationSlug(situationQp);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
