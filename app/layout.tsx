@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Fraunces, DM_Sans } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from '@/components/AuthProvider';
+import { PostHogProvider } from '@/components/PostHogProvider';
 import { BRAND_NAME, TAGLINE, DOMAIN } from '@/lib/brand';
 import './globals.css';
 
@@ -43,7 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${fraunces.variable} ${dmSans.variable}`}>
       <body className="bg-cream text-ink antialiased">
-        <AuthProvider>{children}</AuthProvider>
+        <PostHogProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </PostHogProvider>
+        <Analytics />
       </body>
     </html>
   );

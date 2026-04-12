@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     productId: entry.productId,
     uid: user.uid,
     creditAmount: entry.credits,
-    successUrl: `${origin}/library?purchase=success`,
+    successUrl: `${origin}/thank-you`,
     cancelUrl: `${origin}/pricing?purchase=cancelled`,
   });
 
