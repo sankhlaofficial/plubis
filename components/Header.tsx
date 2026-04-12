@@ -8,6 +8,7 @@ import { clientDb } from '@/lib/firebase-client';
 import Logo from '@/components/Logo';
 import Button from '@/components/Button';
 import MobileMenu from '@/components/MobileMenu';
+import PricingModal from '@/components/PricingModal';
 
 function CreditPill({
   credits,
@@ -76,11 +77,15 @@ function CreditPill({
 }
 
 export default function Header() {
-  const { user, signOut, getIdToken } = useAuth();
+  const { user, signOut } = useAuth();
   const [credits, setCredits] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [buying, setBuying] = useState(false);
-  const [buyError, setBuyError] = useState('');
+  const [pricingOpen, setPricingOpen] = useState(false);
+  // Kept so we don't break the existing CreditPill contract — the pill still
+  // takes `buying` for its loading state, but the actual checkout flow is now
+  // driven by PricingModal.
+  const buying = false;
+  const buyError = '';
 
   useEffect(() => {
     if (!user) {
@@ -95,25 +100,11 @@ export default function Header() {
     return () => unsub();
   }, [user]);
 
-  async function handleBuy() {
-    setBuyError('');
-    setBuying(true);
-    try {
-      const token = await getIdToken();
-      const resp = await fetch('/api/checkout?product=credit_1', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = (await resp.json()) as { url?: string; error?: string };
-      if (!resp.ok || !data.url) {
-        setBuyError(data.error || 'Failed to open checkout');
-        return;
-      }
-      window.location.href = data.url;
-    } catch {
-      setBuyError('Network error — please try again');
-    } finally {
-      setBuying(false);
-    }
+  // Opening the PricingModal replaces the old single-product checkout flow.
+  // The modal itself drives the /api/checkout POST once the user picks a
+  // specific tier (1 / 3 / 10 books).
+  function handleBuy() {
+    setPricingOpen(true);
   }
 
   async function handleSignOut() {
@@ -214,6 +205,8 @@ export default function Header() {
         onBuy={handleBuy}
         buying={buying}
       />
+
+      <PricingModal open={pricingOpen} onClose={() => setPricingOpen(false)} />
     </header>
   );
 }

@@ -1,6 +1,7 @@
 import type {
   CollectionReference,
   DocumentReference,
+  Firestore,
   Transaction,
 } from 'firebase-admin/firestore';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -10,6 +11,90 @@ export class InsufficientCreditsError extends Error {
     super('Insufficient credits');
     this.name = 'InsufficientCreditsError';
   }
+}
+
+/**
+ * The size of the free-first-book signup bonus, in credits. Stored here so
+ * the same constant is visible to UI copy ("first book is free") and to the
+ * backend grant logic — no drift.
+ */
+export const SIGNUP_BONUS_CREDITS = 1;
+
+/**
+ * Grants the free-first-book signup bonus to a user. Idempotent via the
+ * `signupBonusGranted` flag on the user doc, so calling this more than once
+ * is a no-op after the first call. Creates the user doc on the fly if
+ * missing. Safe to call from /api/users/init AND /api/book/create so either
+ * entry point can initialize a brand-new user without stepping on the other.
+ *
+ * Returns `{ granted: boolean, credits: number }` so callers can tell whether
+ * a grant just happened and what the current balance is after the call.
+ */
+export async function grantSignupBonus(
+  db: Firestore,
+  userId: string,
+  opts: { email?: string | null } = {},
+): Promise<{ granted: boolean; credits: number }> {
+  const userRef = db.collection('users').doc(userId);
+  const txnCol = db.collection('credit_txns');
+
+  return await db.runTransaction(async (tx) => {
+    const snap = await tx.get(userRef);
+    const exists = snap.exists;
+    const data = (snap.data() || {}) as {
+      credits?: number;
+      signupBonusGranted?: boolean;
+      totalBooksGenerated?: number;
+    };
+
+    // Already granted: no-op. Return current balance.
+    if (exists && data.signupBonusGranted === true) {
+      return { granted: false, credits: data.credits ?? 0 };
+    }
+
+    // Legacy users who already generated books before signup-bonus existed
+    // shouldn't retroactively get a free book. Mark them as granted so future
+    // calls short-circuit, but don't actually add credits.
+    if (exists && (data.totalBooksGenerated ?? 0) > 0) {
+      tx.update(userRef, { signupBonusGranted: true });
+      return { granted: false, credits: data.credits ?? 0 };
+    }
+
+    const currentCredits = data.credits ?? 0;
+    const newBalance = currentCredits + SIGNUP_BONUS_CREDITS;
+
+    if (exists) {
+      tx.update(userRef, {
+        credits: newBalance,
+        signupBonusGranted: true,
+        lastActiveAt: FieldValue.serverTimestamp(),
+      });
+    } else {
+      tx.set(userRef, {
+        uid: userId,
+        email: opts.email || '',
+        displayName: '',
+        photoURL: '',
+        credits: newBalance,
+        totalBooksGenerated: 0,
+        signupBonusGranted: true,
+        createdAt: FieldValue.serverTimestamp(),
+        lastActiveAt: FieldValue.serverTimestamp(),
+      });
+    }
+
+    tx.set(txnCol.doc(), {
+      userId,
+      type: 'signup_bonus',
+      amount: SIGNUP_BONUS_CREDITS,
+      balanceAfter: newBalance,
+      jobId: null,
+      dodoPaymentId: null,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    return { granted: true, credits: newBalance };
+  });
 }
 
 /**

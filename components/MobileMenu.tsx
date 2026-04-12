@@ -92,7 +92,7 @@ export default function MobileMenu({
                 disabled={buying}
                 className="inline-flex items-center gap-2 rounded-full bg-sun border-2 border-outline px-5 py-3 text-sm font-medium text-outline shadow-[0_4px_0_0_#0F172A] hover:translate-y-[1px] hover:shadow-[0_3px_0_0_#0F172A] transition disabled:opacity-50"
               >
-                {buying ? 'Opening checkout…' : 'Buy more credits — $5'}
+                {buying ? 'Opening checkout…' : 'Buy more credits'}
               </button>
             )}
           </div>

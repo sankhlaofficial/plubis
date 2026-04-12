@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { useAuth } from './AuthProvider';
 import Button from '@/components/Button';
+import { clientDb } from '@/lib/firebase-client';
 import { SITUATIONS, SITUATION_OTHER, getSituation } from '@/lib/situations';
 
 const SUGGESTIONS = [
@@ -32,6 +34,11 @@ export function NewBookForm() {
   const [pages, setPages] = useState(12);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Live user-doc state so we can swap the CTA to "free" when the signup
+  // bonus is available. null while loading so the button doesn't flash the
+  // wrong label on first paint.
+  const [credits, setCredits] = useState<number | null>(null);
+  const [totalBooksGenerated, setTotalBooksGenerated] = useState<number | null>(null);
 
   // Prefill from ?topic= query param (driven by example chips on the landing / library page).
   useEffect(() => {
@@ -39,6 +46,37 @@ export function NewBookForm() {
     if (qp && topic === '') setTopic(qp);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // Subscribe to the user doc so we know whether this is the user's first
+  // book (signup bonus available) or a paid book.
+  useEffect(() => {
+    if (!user) {
+      setCredits(null);
+      setTotalBooksGenerated(null);
+      return;
+    }
+    const unsub = onSnapshot(
+      doc(clientDb(), 'users', user.uid),
+      (snap) => {
+        const data = snap.data() as
+          | { credits?: number; totalBooksGenerated?: number }
+          | undefined;
+        setCredits(data?.credits ?? 0);
+        setTotalBooksGenerated(data?.totalBooksGenerated ?? 0);
+      },
+      () => {
+        setCredits(0);
+        setTotalBooksGenerated(0);
+      },
+    );
+    return () => unsub();
+  }, [user]);
+
+  const isFirstFreeBook =
+    credits !== null &&
+    totalBooksGenerated !== null &&
+    totalBooksGenerated === 0 &&
+    credits > 0;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -204,6 +242,12 @@ export function NewBookForm() {
         </div>
       )}
 
+      {isFirstFreeBook && (
+        <div className="rounded-2xl bg-mint border-2 border-outline p-4 text-sm text-outline font-medium text-center">
+          ✨ Your first book is on us. No payment needed.
+        </div>
+      )}
+
       <Button
         type="submit"
         variant="primary"
@@ -216,7 +260,11 @@ export function NewBookForm() {
           (situationSlug === SITUATION_OTHER && situationOther.trim().length < 3)
         }
       >
-        {submitting ? 'Starting…' : 'Generate book (1 credit)'}
+        {submitting
+          ? 'Starting…'
+          : isFirstFreeBook
+            ? 'Generate my free book'
+            : 'Generate book (1 credit)'}
       </Button>
     </form>
   );

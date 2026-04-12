@@ -5,7 +5,11 @@ import { requireAuth } from '@/lib/auth';
 import { adminDb } from '@/lib/firebase-admin';
 import { buildBookPrompt } from '@/lib/prompts';
 import { startBookSession } from '@/lib/agent';
-import { spendCreditTx, InsufficientCreditsError } from '@/lib/credits';
+import {
+  spendCreditTx,
+  InsufficientCreditsError,
+  grantSignupBonus,
+} from '@/lib/credits';
 
 export const runtime = 'nodejs';
 export const maxDuration = 10;
@@ -41,20 +45,13 @@ export async function POST(request: Request) {
   const jobRef = db.collection('jobs').doc();
   const txnCol = db.collection('credit_txns');
 
-  // Pre-create the user doc on first call (can't be done by security rules).
-  const userSnap = await userRef.get();
-  if (!userSnap.exists) {
-    await userRef.set({
-      uid: user.uid,
-      email: user.email || '',
-      displayName: '',
-      photoURL: '',
-      credits: 0,
-      totalBooksGenerated: 0,
-      createdAt: FieldValue.serverTimestamp(),
-      lastActiveAt: FieldValue.serverTimestamp(),
-    });
-  }
+  // Fallback path: ensure the user doc exists and the free-first-book signup
+  // bonus has been granted. Normally AuthProvider already called
+  // /api/users/init, but this covers the edge case where a client somehow
+  // skipped it (offline first sign-in, stale tab, etc). Fully idempotent —
+  // a no-op if the user has already been granted or has books on their
+  // ledger.
+  await grantSignupBonus(db, user.uid, { email: user.email ?? null });
 
   // Atomic credit spend + job create.
   try {

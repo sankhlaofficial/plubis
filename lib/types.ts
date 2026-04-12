@@ -7,6 +7,9 @@ export interface User {
   photoURL: string;
   credits: number;
   totalBooksGenerated: number;
+  /** True once the free-first-book signup bonus has been granted. Prevents
+   * double-granting if /api/users/init is called more than once. */
+  signupBonusGranted?: boolean;
   createdAt: Timestamp;
   lastActiveAt: Timestamp;
 }
@@ -75,7 +78,7 @@ export interface Job {
   creditDebited: boolean;
 }
 
-export type CreditTxnType = 'purchase' | 'spend' | 'refund';
+export type CreditTxnType = 'purchase' | 'spend' | 'refund' | 'signup_bonus';
 
 export interface CreditTxn {
   txnId: string;
