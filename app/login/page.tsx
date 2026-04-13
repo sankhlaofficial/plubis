@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PillLabel from '@/components/PillLabel';
@@ -40,7 +41,9 @@ export default function LoginPage() {
               One click with Google. We&apos;ll keep your books safe in your library.
             </p>
             <div className="flex justify-center">
-              <LoginButton />
+              <Suspense fallback={<div className="h-14" />}>
+                <LoginButton />
+              </Suspense>
             </div>
             <p className="text-xs text-ink-soft mt-6">
               By signing in, you agree that we store your email and book history to let you come back to your library.

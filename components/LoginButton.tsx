@@ -2,7 +2,7 @@
 
 import { signInWithPopup } from 'firebase/auth';
 import { clientAuth, googleProvider } from '@/lib/firebase-client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 function GoogleIcon() {
@@ -30,13 +30,15 @@ function GoogleIcon() {
 
 export function LoginButton() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
     setLoading(true);
     try {
       await signInWithPopup(clientAuth(), googleProvider);
-      router.push('/library');
+      const redirect = searchParams.get('redirect');
+      router.push(redirect && redirect.startsWith('/') ? redirect : '/library');
     } catch (e) {
       console.error(e);
       setLoading(false);

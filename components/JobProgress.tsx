@@ -168,27 +168,47 @@ export function JobProgress({ jobId }: { jobId: string }) {
 
   if (error) {
     const isImageRetry = error.includes('illustration');
+    const isPermission = error.toLowerCase().includes('permission') || error.toLowerCase().includes('unauthenticated');
+    const isNotFound = error.includes('not found');
+
+    let pill = 'Something went wrong';
+    let pillColor: 'pink' | 'yellow' | 'mint' = 'pink';
+    let message = error;
+    let primaryAction = { label: 'Refresh', href: '', onClick: () => window.location.reload() };
+    let secondaryAction = { label: 'Back to library', href: '/library' };
+
+    if (isImageRetry) {
+      pill = 'Almost there';
+      pillColor = 'yellow';
+      primaryAction.label = 'Try again';
+    } else if (isPermission) {
+      pill = 'Sign in to view this book';
+      pillColor = 'yellow';
+      message = 'This book belongs to a different account, or you need to sign in to view it.';
+      primaryAction = { label: 'Sign in', href: `/login?redirect=${encodeURIComponent(`/job/${jobId}`)}`, onClick: () => {} };
+      secondaryAction = { label: 'Go home', href: '/' };
+    } else if (isNotFound) {
+      pill = 'Book not found';
+      message = "We couldn't find this book. It may have been removed, or the link might be wrong.";
+    }
+
     return (
       <div className="w-full max-w-md mx-auto text-center">
         <div className="rounded-[28px] bg-white border-2 border-outline p-10">
           <div className="flex justify-center mb-4">
-            <JobPhaseAnimation phase="generating-images" size={128} />
+            <JobPhaseAnimation phase={isImageRetry ? 'generating-images' : 'failed'} size={128} />
           </div>
           <div className="flex justify-center mb-3">
-            <PillLabel color={isImageRetry ? 'yellow' : 'pink'}>
-              {isImageRetry ? 'Almost there' : 'Something went wrong'}
-            </PillLabel>
+            <PillLabel color={pillColor}>{pill}</PillLabel>
           </div>
-          <p className="text-ink-soft mb-6">{error}</p>
+          <p className="text-ink-soft mb-6">{message}</p>
           <div className="flex gap-3 justify-center">
-            <Button
-              onClick={() => window.location.reload()}
-              variant="primary"
-              size="md"
-            >
-              {isImageRetry ? 'Try again' : 'Refresh'}
-            </Button>
-            <Button href="/library" variant="secondary" size="md">Back to library</Button>
+            {primaryAction.href ? (
+              <Button href={primaryAction.href} variant="primary" size="md">{primaryAction.label}</Button>
+            ) : (
+              <Button onClick={primaryAction.onClick} variant="primary" size="md">{primaryAction.label}</Button>
+            )}
+            <Button href={secondaryAction.href} variant="secondary" size="md">{secondaryAction.label}</Button>
           </div>
         </div>
       </div>
