@@ -1,0 +1,39 @@
+name: Refresh blog freshness timestamps
+
+# Runs automatically:
+# - Every Monday at 6:00 AM UTC (weekly touch on all articles)
+# - Can also be triggered manually from GitHub Actions tab
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Every Monday 6 AM UTC
+  workflow_dispatch: {}    # Manual trigger button
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run freshness refresh
+        run: node scripts/refresh-blog.cjs
+
+      - name: Check for changes
+        id: diff
+        run: |
+          git diff --quiet content/blog.json && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/blog.json
+          git commit -m "chore: weekly blog freshness refresh [automated]"
+          git push
