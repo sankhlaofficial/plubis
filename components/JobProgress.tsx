@@ -237,8 +237,8 @@ export function JobProgress({ jobId }: { jobId: string }) {
           <h2 className="text-3xl md:text-4xl mb-2">{job.bookJson?.title || 'Your book'}</h2>
           <p className="text-ink-soft mb-6">Ready to read.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
-            <Button href={job.pdfUrl} download size="md" variant="primary">Download PDF</Button>
-            <Button href={job.epubUrl} download size="md" variant="secondary">Download EPUB</Button>
+            <Button href={job.pdfUrl} external size="md" variant="primary">Download PDF</Button>
+            <Button href={job.epubUrl} external size="md" variant="secondary">Download EPUB</Button>
           </div>
 
           <div className="border-t-2 border-cream-200 pt-6 mt-6">
