@@ -1,0 +1,55 @@
+# Plubis
+
+> AI-generated picture books for children facing specific emotional situations. A book for the hard things to explain.
+
+## What this site does
+
+Plubis makes personalized illustrated picture books for kids ages 2-6 going through hard moments — new sibling, divorce, grief, nightmares, first day of school, big feelings, and more. Parents pick the situation, enter their child's name, and get a custom illustrated book in about 5 minutes. The first book is free.
+
+The books are "conversation books" — designed to help parents talk to their children about specific emotional situations using age-appropriate story framing. Not therapy. Not medical advice. Conversation starters.
+
+## Pricing
+
+- 1 book: $5
+- 3 books: $12 (save 20%)
+- 10 books: $35 (save 30%)
+- First book: free on signup
+
+## Key pages
+
+- / — Landing page (product overview, how it works, pricing)
+- /about — What Plubis is and isn't, how books get made, category positioning
+- /pricing — Credit pack tiers
+- /blog — Index of 125 picture-book recommendation guides (5 ages × 25 situations)
+- /new — Book creation form (requires sign-in)
+
+## Blog content structure
+
+125 articles at /blog/{slug}. Each one:
+- Targets a specific age (2, 3, 4, 5, or 6) and emotional situation
+- Recommends 5-8 real, published picture books with author names
+- Includes age-appropriate reading advice
+- Written in honest, parent-to-parent voice
+- Ends with a Plubis CTA for custom book creation
+
+Slug pattern: picture-books-for-{age}-year-old-about-{situation}
+
+## Situations covered (25 total)
+
+new-sibling, first-day-school, grief-pet, grief-grandparent, divorce, moving, nightmares, doctor-visit, dentist-visit, potty-regression, parent-travel, deployment, big-feelings, tantrums, new-pet, lost-friend, new-school, new-language, parent-illness, bedtime, sharing, making-friends, confidence, picky-eating, independence
+
+## Example article URLs
+
+- /blog/picture-books-for-3-year-old-about-new-sibling
+- /blog/picture-books-for-4-year-old-about-divorce
+- /blog/picture-books-for-5-year-old-about-grief-pet
+- /blog/picture-books-for-2-year-old-about-nightmares
+- /blog/picture-books-for-6-year-old-about-big-feelings
+
+## Tech stack
+
+Next.js, Firebase, Anthropic Claude (Managed Agents), Cloudflare Workers AI (Flux Schnell for illustrations)
+
+## Contact
+
+hello@example.com

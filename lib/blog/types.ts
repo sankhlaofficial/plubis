@@ -30,6 +30,8 @@ export interface BlogArticleConfig {
 export interface BlogArticle extends BlogArticleConfig {
   /** ISO timestamp of when this article was generated. */
   generatedAt: string;
+  /** ISO timestamp of the last content update (for freshness signals). */
+  lastUpdated?: string;
   /** Raw markdown body — ~1500 words, includes headings and lists. */
   body: string;
 }

@@ -10,10 +10,37 @@ export const metadata: Metadata = {
     'Plubis makes picture books for the hard conversations — new sibling, first day of school, grief, big feelings. Generated in 5 minutes. The first one is free.',
 };
 
+const BASE_URL = `https://${process.env.NEXT_PUBLIC_DOMAIN || 'plubis.vercel.app'}`;
+
+const aboutSchema = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Plubis',
+    url: BASE_URL,
+    logo: `${BASE_URL}/icon-512.png`,
+    description: 'AI-generated picture books for children facing specific emotional situations.',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: 'About Plubis',
+    url: `${BASE_URL}/about`,
+    mainEntity: { '@type': 'Organization', name: 'Plubis', url: BASE_URL },
+  },
+];
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-cream flex flex-col">
       <Header />
+      {aboutSchema.map((s, i) => (
+        <script
+          key={i}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }}
+        />
+      ))}
 
       <main className="flex-1">
         {/* Hero */}
