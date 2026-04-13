@@ -73,9 +73,10 @@ export function JobProgress({ jobId }: { jobId: string }) {
       // which trips Vercel Hobby's function timeout and returns 504. The
       // /api/book/image route is idempotent (returns existing url if the
       // image is already uploaded) so retrying the same page is safe and
-      // cheap. Up to 3 attempts per image with 2s spacing between tries.
+      // cheap. Up to 5 attempts per image with escalating spacing.
       const generateOne = async (p: number): Promise<boolean> => {
-        for (let attempt = 1; attempt <= 3; attempt++) {
+        const delays = [2000, 3000, 5000, 8000]; // spacing between attempts
+        for (let attempt = 1; attempt <= 5; attempt++) {
           try {
             const resp = await fetch('/api/book/image', {
               method: 'POST',
@@ -91,7 +92,7 @@ export function JobProgress({ jobId }: { jobId: string }) {
           } catch {
             // network error — fall through to retry
           }
-          if (attempt < 3) await new Promise((r) => setTimeout(r, 2000));
+          if (attempt < 5) await new Promise((r) => setTimeout(r, delays[attempt - 1] || 5000));
         }
         return false;
       };
@@ -105,10 +106,19 @@ export function JobProgress({ jobId }: { jobId: string }) {
       const results = await Promise.all(tasks);
       const failed = results.filter((ok) => !ok).length;
       if (failed > 0) {
-        // After all retries exhausted, surface the error to the UI so the
-        // user can hit Reload (which will re-trigger this effect because
-        // the imagesKickedOff guard resets on a fresh mount).
-        setError(`${failed} of ${pageCount + 1} illustrations failed after 3 retries — refresh to try again`);
+        // Auto-reload once — the imagesKickedOff ref resets on fresh mount
+        // so the retry loop starts again automatically. Only show error if
+        // this is already a reload (detected via sessionStorage flag).
+        const retryKey = `plubis_img_retry_${jobId}`;
+        const alreadyRetried = sessionStorage.getItem(retryKey);
+        if (!alreadyRetried) {
+          sessionStorage.setItem(retryKey, '1');
+          window.location.reload();
+          return;
+        }
+        // Second attempt also failed — show a gentle error with auto-retry
+        sessionStorage.removeItem(retryKey);
+        setError(`${failed} illustration${failed > 1 ? 's are' : ' is'} taking longer than usual. Please refresh the page to try again.`);
       }
     })().catch((e) => setError(e.message));
   }, [job?.status, job?.bookJson, jobId, getIdToken]);
@@ -157,14 +167,29 @@ export function JobProgress({ jobId }: { jobId: string }) {
   }, [job?.pdfUrl, job?.epubUrl, jobId, getIdToken]);
 
   if (error) {
+    const isImageRetry = error.includes('illustration');
     return (
       <div className="w-full max-w-md mx-auto text-center">
         <div className="rounded-[28px] bg-white border-2 border-outline p-10">
           <div className="flex justify-center mb-4">
-            <PillLabel color="pink">Something went wrong</PillLabel>
+            <JobPhaseAnimation phase="generating-images" size={128} />
+          </div>
+          <div className="flex justify-center mb-3">
+            <PillLabel color={isImageRetry ? 'yellow' : 'pink'}>
+              {isImageRetry ? 'Almost there' : 'Something went wrong'}
+            </PillLabel>
           </div>
           <p className="text-ink-soft mb-6">{error}</p>
-          <Button href="/library" variant="secondary" size="md">Back to library</Button>
+          <div className="flex gap-3 justify-center">
+            <Button
+              onClick={() => window.location.reload()}
+              variant="primary"
+              size="md"
+            >
+              {isImageRetry ? 'Try again' : 'Refresh'}
+            </Button>
+            <Button href="/library" variant="secondary" size="md">Back to library</Button>
+          </div>
         </div>
       </div>
     );
