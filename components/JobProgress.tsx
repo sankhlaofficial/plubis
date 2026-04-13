@@ -237,8 +237,8 @@ export function JobProgress({ jobId }: { jobId: string }) {
           <h2 className="text-3xl md:text-4xl mb-2">{job.bookJson?.title || 'Your book'}</h2>
           <p className="text-ink-soft mb-6">Ready to read.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
-            <Button href={job.pdfUrl} external size="md" variant="primary">Download PDF</Button>
-            <Button href={job.epubUrl} external size="md" variant="secondary">Download EPUB</Button>
+            <DownloadButton url={job.pdfUrl} filename={`${slugify(job.bookJson?.title)}.pdf`} variant="primary">Download PDF</DownloadButton>
+            <DownloadButton url={job.epubUrl} filename={`${slugify(job.bookJson?.title)}.epub`} variant="secondary">Download EPUB</DownloadButton>
           </div>
 
           <div className="border-t-2 border-cream-200 pt-6 mt-6">
@@ -280,6 +280,72 @@ export function JobProgress({ jobId }: { jobId: string }) {
         <p className="text-ink-soft text-sm">{message}</p>
       </div>
     </div>
+  );
+}
+
+/** Slugify a title for use as a download filename. */
+function slugify(title: string | undefined): string {
+  return (title || 'plubis-book')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60) || 'plubis-book';
+}
+
+/**
+ * Cross-browser download button. Fetches the file as a blob and triggers
+ * a save dialog with the correct filename. Works in Chrome, Safari, Firefox
+ * regardless of cross-origin restrictions on the download attribute.
+ */
+function DownloadButton({
+  url,
+  filename,
+  variant,
+  children,
+}: {
+  url: string;
+  filename: string;
+  variant: 'primary' | 'secondary';
+  children: React.ReactNode;
+}) {
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleDownload() {
+    setDownloading(true);
+    try {
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback: open in new tab if fetch fails
+      window.open(url, '_blank');
+    }
+    setDownloading(false);
+  }
+
+  const base =
+    'inline-flex items-center justify-center rounded-full font-medium border-2 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sun disabled:opacity-50 disabled:cursor-not-allowed px-6 py-3 text-base';
+  const variantClass =
+    variant === 'primary'
+      ? 'bg-sun text-outline border-outline shadow-[0_4px_0_0_#0F172A] hover:translate-y-[1px] hover:shadow-[0_3px_0_0_#0F172A]'
+      : 'bg-cream text-outline border-outline hover:bg-cream-200';
+
+  return (
+    <button
+      type="button"
+      onClick={handleDownload}
+      disabled={downloading}
+      className={`${base} ${variantClass}`}
+    >
+      {downloading ? 'Downloading...' : children}
+    </button>
   );
 }
 
